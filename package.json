@@ -1,0 +1,49 @@
+{
+  "name": "atlasui",
+  "version": "0.1.0",
+  "private": false,
+  "description": "AtlasUI — A modern, customizable UI component system for building scalable web applications.",
+  "author": "AtlasUI (JohnDev19)",
+  "license": "MIT",
+  "homepage": "https://atlasui.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JohnDev19/AtlasUI.git"
+  },
+  "bugs": {
+    "url": "https://github.com/JohnDev19/AtlasUI/issues"
+  },
+  "keywords": [
+    "AtlasUI",
+    "react-ui",
+    "component-library",
+    "design-system",
+    "nextjs",
+    "react-components",
+    "ui-kit"
+  ],
+  "workspaces": [
+    "packages/*",
+    "cli"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\""
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "prettier": "^3.2.4",
+    "turbo": "^1.11.3",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

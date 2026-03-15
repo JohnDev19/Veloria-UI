@@ -31,9 +31,9 @@ const PKG_VERSION: string = (require("../../package.json") as { version: string 
 // ─── Banner ───────────────────────────────────────────────────────────────
 
 const banner = `
-${chalk.bold.blue("  ╔═╗╔╦╗╦  ╔═╗╔═╗╦ ╦╦")}
-${chalk.bold.blue("  ╠═╣ ║ ║  ╠═╣╚═╗║ ║║")}
-${chalk.bold.blue("  ╩ ╩ ╩ ╩═╝╩ ╩╚═╝╚═╝╩")}
+${chalk.bold.blue("  ╦  ╦╔═╗╦  ╔═╗╦═╗╦╔═╗")}
+${chalk.bold.blue("  ╚╗╔╝║╣ ║  ║ ║╠╦╝║╠═╣")}
+${chalk.bold.blue("   ╚╝ ╚═╝╩═╝╚═╝╩╚═╩╩ ╩")}
   ${chalk.dim("Build anything. Ship faster.")}
   ${chalk.dim("by JohnDev19  ·  https://github.com/JohnDev19/Veloria-UI")}
 `;

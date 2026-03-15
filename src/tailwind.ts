@@ -1,11 +1,19 @@
-import plugin from "tailwindcss/plugin";
 import type { Config } from "tailwindcss";
+
+// tailwindcss is a peerDep — it lives in the consumer's node_modules, never
+// bundled into atlasui-kit. We require() at runtime so tsup marks it external
+// correctly instead of trying to resolve it at build time.
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const plugin = require("tailwindcss/plugin") as (
+  handler: Parameters<typeof import("tailwindcss/plugin")>[0],
+  config?: Parameters<typeof import("tailwindcss/plugin")>[1]
+) => ReturnType<typeof import("tailwindcss/plugin")>;
 
 /**
  * AtlasUI Tailwind plugin.
  *
- * Maps the CSS custom properties defined in atlas.css to Tailwind
- * color/radius/font utilities. Drop this into your tailwind.config.ts:
+ * Maps the CSS custom properties in atlas.css to Tailwind utilities.
+ * Add to your tailwind.config.ts:
  *
  *   import { atlasPlugin } from "atlasui-kit/tailwind";
  *   plugins: [atlasPlugin],

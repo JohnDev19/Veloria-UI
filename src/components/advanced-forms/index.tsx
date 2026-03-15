@@ -553,7 +553,415 @@ const MultiSelect = ({ options, value = [], onChange, placeholder = "Select...",
 };
 MultiSelect.displayName = "MultiSelect";
 
+
+// ═══════════════════════════════════════════════════════════════
+// New in v0.1.2
+// ═══════════════════════════════════════════════════════════════
+
+
+// ─── PhoneInput ───────────────────────────────────────────────────────────
+
+const COUNTRY_CODES = [
+  { code: "US", dial: "+1",  flag: "US" },
+  { code: "GB", dial: "+44", flag: "GB" },
+  { code: "AU", dial: "+61", flag: "AU" },
+  { code: "CA", dial: "+1",  flag: "CA" },
+  { code: "DE", dial: "+49", flag: "DE" },
+  { code: "FR", dial: "+33", flag: "FR" },
+  { code: "IN", dial: "+91", flag: "IN" },
+  { code: "JP", dial: "+81", flag: "JP" },
+  { code: "CN", dial: "+86", flag: "CN" },
+  { code: "BR", dial: "+55", flag: "BR" },
+  { code: "MX", dial: "+52", flag: "MX" },
+  { code: "PH", dial: "+63", flag: "PH" },
+  { code: "SG", dial: "+65", flag: "SG" },
+  { code: "ZA", dial: "+27", flag: "ZA" },
+  { code: "NG", dial: "+234", flag: "NG" },
+];
+
+export interface PhoneInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value" | "size"> {
+  value?: string;
+  onChange?: (value: string) => void;
+  defaultCountry?: string;
+  invalid?: boolean;
+  size?: "sm" | "md" | "lg";
+}
+
+const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
+  ({ className, value = "", onChange, defaultCountry = "US", invalid, size = "md", disabled, ...props }, ref) => {
+    const [country, setCountry] = React.useState(
+      COUNTRY_CODES.find((c) => c.code === defaultCountry) ?? COUNTRY_CODES[0]
+    );
+    const [open, setOpen] = React.useState(false);
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+      const handler = (e: MouseEvent) => {
+        if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+          setOpen(false);
+        }
+      };
+      document.addEventListener("mousedown", handler);
+      return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
+    return (
+      <div ref={containerRef} className={cn("atlas-phone-input relative flex w-full", className)}>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setOpen(!open)}
+          className={cn(
+            "flex shrink-0 items-center gap-1.5 rounded-l-md border border-r-0 border-input bg-background px-3",
+            "hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-ring",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            size === "sm" && "h-8 text-xs",
+            size === "md" && "h-9 text-sm",
+            size === "lg" && "h-10 text-sm",
+            invalid && "border-destructive"
+          )}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-label="Select country code"
+        >
+          <span className="text-base leading-none">{country.dial}</span>
+          <svg className="h-3 w-3 opacity-50 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <input
+          ref={ref}
+          type="tel"
+          value={value}
+          disabled={disabled}
+          onChange={(e) => onChange?.(e.target.value)}
+          aria-invalid={invalid}
+          className={cn(
+            "flex w-full rounded-r-md border border-input bg-background px-3 text-sm",
+            "placeholder:text-muted-foreground",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            size === "sm" && "h-8 text-xs",
+            size === "md" && "h-9",
+            size === "lg" && "h-10",
+            invalid && "border-destructive focus-visible:ring-destructive"
+          )}
+          {...props}
+        />
+
+        {open && (
+          <div
+            role="listbox"
+            aria-label="Country codes"
+            className="absolute top-full left-0 z-50 mt-1 w-48 rounded-md border border-border bg-popover shadow-md overflow-y-auto max-h-56"
+          >
+            {COUNTRY_CODES.map((c) => (
+              <button
+                key={c.code}
+                type="button"
+                role="option"
+                aria-selected={c.code === country.code}
+                onClick={() => { setCountry(c); setOpen(false); }}
+                className={cn(
+                  "flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-accent transition-colors",
+                  c.code === country.code && "bg-accent"
+                )}
+              >
+                <span className="font-mono text-xs text-muted-foreground w-10 shrink-0">{c.dial}</span>
+                <span>{c.code}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+PhoneInput.displayName = "PhoneInput";
+
+// ─── TagInput ─────────────────────────────────────────────────────────────
+
+export interface TagInputProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "size"> {
+  value?: string[];
+  onChange?: (tags: string[]) => void;
+  placeholder?: string;
+  maxTags?: number;
+  invalid?: boolean;
+  disabled?: boolean;
+  allowDuplicates?: boolean;
+  size?: "sm" | "md" | "lg";
+}
+
+const TagInput = React.forwardRef<HTMLDivElement, TagInputProps>(
+  ({
+    className,
+    value = [],
+    onChange,
+    placeholder = "Add tag...",
+    maxTags,
+    invalid,
+    disabled,
+    allowDuplicates = false,
+    size = "md",
+    ...props
+  }, ref) => {
+    const [input, setInput] = React.useState("");
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    const addTag = (tag: string) => {
+      const trimmed = tag.trim();
+      if (!trimmed) return;
+      if (!allowDuplicates && value.includes(trimmed)) return;
+      if (maxTags && value.length >= maxTags) return;
+      onChange?.([...value, trimmed]);
+      setInput("");
+    };
+
+    const removeTag = (index: number) => {
+      onChange?.(value.filter((_, i) => i !== index));
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" || e.key === ",") {
+        e.preventDefault();
+        addTag(input);
+      }
+      if (e.key === "Backspace" && !input && value.length > 0) {
+        removeTag(value.length - 1);
+      }
+    };
+
+    return (
+      <div
+        ref={ref}
+        role="group"
+        aria-label="Tag input"
+        onClick={() => inputRef.current?.focus()}
+        className={cn(
+          "atlas-tag-input flex flex-wrap gap-1.5 w-full rounded-md border border-input bg-background px-3 py-2",
+          "cursor-text transition-shadow",
+          "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+          size === "sm" && "min-h-[2rem] text-xs",
+          size === "md" && "min-h-[2.25rem] text-sm",
+          size === "lg" && "min-h-[2.5rem] text-sm",
+          invalid && "border-destructive focus-within:ring-destructive",
+          disabled && "opacity-50 cursor-not-allowed",
+          className
+        )}
+        {...props}
+      >
+        {value.map((tag, i) => (
+          <span
+            key={i}
+            className="inline-flex items-center gap-1 rounded bg-secondary px-1.5 py-0.5 text-xs font-medium"
+          >
+            {tag}
+            {!disabled && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); removeTag(i); }}
+                aria-label={`Remove ${tag}`}
+                className="rounded-full hover:bg-muted-foreground/20 p-0.5 transition-colors"
+              >
+                <svg className="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </span>
+        ))}
+        <input
+          ref={inputRef}
+          type="text"
+          value={input}
+          disabled={disabled}
+          placeholder={value.length === 0 ? placeholder : undefined}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={() => { if (input) addTag(input); }}
+          className="flex-1 min-w-[80px] bg-transparent outline-none placeholder:text-muted-foreground text-sm disabled:cursor-not-allowed"
+          aria-label="Type and press Enter to add tag"
+        />
+      </div>
+    );
+  }
+);
+TagInput.displayName = "TagInput";
+
+// ─── CurrencyInput ────────────────────────────────────────────────────────
+
+export interface CurrencyInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value" | "type" | "size"> {
+  value?: number | string;
+  onChange?: (value: number | undefined) => void;
+  currency?: string;
+  locale?: string;
+  invalid?: boolean;
+  size?: "sm" | "md" | "lg";
+}
+
+const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
+  ({ className, value, onChange, currency = "USD", locale = "en-US", invalid, size = "md", disabled, ...props }, ref) => {
+    const [display, setDisplay] = React.useState(
+      value !== undefined && value !== "" ? String(value) : ""
+    );
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = e.target.value.replace(/[^0-9.]/g, "");
+      setDisplay(raw);
+      const num = parseFloat(raw);
+      onChange?.(isNaN(num) ? undefined : num);
+    };
+
+    const symbol = new Intl.NumberFormat(locale, { style: "currency", currency })
+      .formatToParts(0)
+      .find((p) => p.type === "currency")?.value ?? "$";
+
+    return (
+      <div className={cn("atlas-currency-input relative flex items-center w-full", className)}>
+        <span className={cn(
+          "absolute left-3 text-muted-foreground select-none pointer-events-none",
+          size === "sm" && "text-xs",
+          size === "md" && "text-sm",
+          size === "lg" && "text-sm",
+        )}>
+          {symbol}
+        </span>
+        <input
+          ref={ref}
+          type="text"
+          inputMode="decimal"
+          value={display}
+          disabled={disabled}
+          onChange={handleChange}
+          aria-invalid={invalid}
+          className={cn(
+            "flex w-full rounded-md border border-input bg-background text-sm",
+            "placeholder:text-muted-foreground",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            "pl-8 pr-3",
+            size === "sm" && "h-8 text-xs",
+            size === "md" && "h-9",
+            size === "lg" && "h-10",
+            invalid && "border-destructive focus-visible:ring-destructive",
+          )}
+          {...props}
+        />
+      </div>
+    );
+  }
+);
+CurrencyInput.displayName = "CurrencyInput";
+
+// ─── RatingInput ──────────────────────────────────────────────────────────
+
+export interface RatingInputProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "size"> {
+  value?: number;
+  onChange?: (value: number) => void;
+  max?: number;
+  size?: "sm" | "md" | "lg";
+  disabled?: boolean;
+  readOnly?: boolean;
+  allowHalf?: boolean;
+}
+
+const ratingIconSizes = { sm: "h-4 w-4", md: "h-6 w-6", lg: "h-8 w-8" };
+
+const StarIcon = ({ filled, half, className }: { filled: boolean; half?: boolean; className?: string }) => (
+  <svg
+    className={cn(className, "transition-colors")}
+    fill={filled ? "currentColor" : "none"}
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    {half ? (
+      <>
+        <defs>
+          <linearGradient id="half-fill">
+            <stop offset="50%" stopColor="currentColor" />
+            <stop offset="50%" stopColor="transparent" />
+          </linearGradient>
+        </defs>
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          fill="url(#half-fill)"
+          d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+        />
+      </>
+    ) : (
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+      />
+    )}
+  </svg>
+);
+
+const RatingInput = React.forwardRef<HTMLDivElement, RatingInputProps>(
+  ({ className, value = 0, onChange, max = 5, size = "md", disabled, readOnly, ...props }, ref) => {
+    const [hovered, setHovered] = React.useState<number | null>(null);
+    const display = hovered ?? value;
+
+    return (
+      <div
+        ref={ref}
+        role="radiogroup"
+        aria-label="Rating"
+        className={cn("atlas-rating-input flex items-center gap-0.5", className)}
+        onMouseLeave={() => setHovered(null)}
+        {...props}
+      >
+        {Array.from({ length: max }, (_, i) => {
+          const starValue = i + 1;
+          const filled = display >= starValue;
+
+          return (
+            <button
+              key={i}
+              type="button"
+              role="radio"
+              aria-checked={value === starValue}
+              aria-label={`Rate ${starValue} out of ${max}`}
+              disabled={disabled || readOnly}
+              onClick={() => onChange?.(starValue)}
+              onMouseEnter={() => !readOnly && setHovered(starValue)}
+              className={cn(
+                "text-yellow-400 transition-transform",
+                !disabled && !readOnly && "hover:scale-110 cursor-pointer",
+                (disabled || readOnly) && "cursor-default",
+                !filled && "text-muted"
+              )}
+            >
+              <StarIcon filled={filled} className={ratingIconSizes[size]} />
+            </button>
+          );
+        })}
+        {value > 0 && !readOnly && !disabled && (
+          <button
+            type="button"
+            onClick={() => onChange?.(0)}
+            className="ml-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Clear rating"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+    );
+  }
+);
+RatingInput.displayName = "RatingInput";
+
+export { PhoneInput, TagInput, CurrencyInput, RatingInput };
+
 export {
+
   FileUpload,
   OTPInput,
   ColorPicker,
@@ -564,4 +972,6 @@ export {
   FormField,
   FormLabel,
   FormError,
+,
+  PhoneInput, TagInput, CurrencyInput, RatingInput
 };

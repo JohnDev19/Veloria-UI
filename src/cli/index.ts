@@ -25,6 +25,8 @@ import prompts from "prompts";
 import fs from "fs-extra";
 import { execa } from "execa";
 import { REGISTRY, COMPONENTS_BY_NAME, CATEGORIES, type Category } from "./registry";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const PKG_VERSION: string = (require("../../package.json") as { version: string }).version;
 
 // ─── Banner ───────────────────────────────────────────────────────────────
 
@@ -43,7 +45,7 @@ const program = new Command();
 program
   .name("atlasui-lib")
   .description("atlasui-lib CLI — copy components into your project")
-  .version("0.1.0", "-v, --version")
+  .version(PKG_VERSION, "-v, --version")
   .addHelpText("before", banner);
 
 // ─── init ─────────────────────────────────────────────────────────────────

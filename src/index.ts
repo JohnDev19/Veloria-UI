@@ -8,7 +8,6 @@
  * Docs: https://atlasui.vercel.app/
  * Issues: https://github.com/JohnDev19/AtlasUI/issues
  *
- * @version 0.1.0
  * @license MIT
  */
 
@@ -351,3 +350,47 @@ export { cn, composeEventHandlers, generateId, isBrowser, isDefined, noop } from
 
 // ─── Tailwind plugin ──────────────────────────────────────────────────────
 export { atlasPlugin, atlasPreset } from "./tailwind";
+
+// ─── v0.1.2 — New Components ─────────────────────────────────────────────
+
+// Advanced Forms
+export { PhoneInput, TagInput, CurrencyInput, RatingInput } from "./components/advanced-forms";
+export type { PhoneInputProps, TagInputProps, CurrencyInputProps, RatingInputProps } from "./components/advanced-forms";
+
+// Data Display
+export { StatsCard, TreeView, JsonViewer, Heatmap, KanbanBoard } from "./components/data-display";
+export type {
+  StatsCardProps, TreeNode, TreeViewProps,
+  JsonViewerProps, JsonValue,
+  HeatmapCell, HeatmapProps,
+  KanbanCard, KanbanColumn, KanbanBoardProps,
+} from "./components/data-display";
+
+// Feedback & Overlay
+export { BannerAlert, ConfirmDialog, FloatingActionButton, RichTooltip, Tour } from "./components/feedback";
+export type {
+  BannerAlertProps, ConfirmDialogProps,
+  FABAction, FloatingActionButtonProps,
+  RichTooltipProps, TourStep, TourProps,
+} from "./components/feedback";
+
+// Utility
+export { InfiniteScroll, VirtualList } from "./components/utility";
+export type { InfiniteScrollProps, VirtualListProps } from "./components/utility";
+
+// ─── v0.1.2 — New Hooks ──────────────────────────────────────────────────
+export {
+  useForm,
+  usePagination,
+  useIntersection,
+  useWindowSize,
+  useStep,
+  useCountdown,
+} from "./hooks";
+export type {
+  UseFormOptions, UseFormReturn,
+  UsePaginationOptions, UsePaginationReturn,
+  UseIntersectionOptions, WindowSize,
+  UseStepOptions, UseStepReturn,
+  UseCountdownOptions, UseCountdownReturn,
+} from "./hooks";

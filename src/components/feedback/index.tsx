@@ -540,7 +540,505 @@ const Notification = React.forwardRef<HTMLDivElement, NotificationProps>(
 );
 Notification.displayName = "Notification";
 
+
+// ═══════════════════════════════════════════════════════════════
+// New in v0.1.2
+// ═══════════════════════════════════════════════════════════════
+
+
+// ─── BannerAlert ──────────────────────────────────────────────────────────
+
+export interface BannerAlertProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  variant?: "info" | "success" | "warning" | "danger";
+  dismissible?: boolean;
+  onDismiss?: () => void;
+  action?: React.ReactNode;
+  icon?: React.ReactNode;
+}
+
+const bannerVariants = {
+  info:    "bg-info/10 border-info/30 text-info-foreground [&_.atlas-banner-icon]:text-info",
+  success: "bg-success/10 border-success/30 text-success-foreground [&_.atlas-banner-icon]:text-success",
+  warning: "bg-warning/10 border-warning/30 text-warning-foreground [&_.atlas-banner-icon]:text-warning",
+  danger:  "bg-destructive/10 border-destructive/30 text-destructive [&_.atlas-banner-icon]:text-destructive",
+};
+
+const defaultBannerIcons: Record<string, React.ReactNode> = {
+  info: (
+    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  success: (
+    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  warning: (
+    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    </svg>
+  ),
+  danger: (
+    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+};
+
+const BannerAlert = React.forwardRef<HTMLDivElement, BannerAlertProps>(
+  ({ className, title, description, variant = "info", dismissible, onDismiss, action, icon, ...props }, ref) => (
+    <div
+      ref={ref}
+      role="alert"
+      className={cn(
+        "atlas-banner-alert w-full border-y px-4 py-3",
+        bannerVariants[variant],
+        className
+      )}
+      {...props}
+    >
+      <div className="flex items-start gap-3 max-w-screen-xl mx-auto">
+        <span className="atlas-banner-icon shrink-0 mt-0.5">
+          {icon ?? defaultBannerIcons[variant]}
+        </span>
+        <div className="flex-1 min-w-0">
+          {title && <p className="font-semibold text-sm">{title}</p>}
+          {description && <p className="text-sm mt-0.5 opacity-90">{description}</p>}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {action}
+          {dismissible && (
+            <button
+              type="button"
+              onClick={onDismiss}
+              aria-label="Dismiss"
+              className="rounded-md p-1 opacity-60 hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-current"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+);
+BannerAlert.displayName = "BannerAlert";
+
+// ─── ConfirmDialog ────────────────────────────────────────────────────────
+
+export interface ConfirmDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  variant?: "default" | "danger";
+  onConfirm?: () => void | Promise<void>;
+  onCancel?: () => void;
+  loading?: boolean;
+}
+
+const ConfirmDialog = ({
+  open,
+  onOpenChange,
+  title = "Are you sure?",
+  description = "This action cannot be undone.",
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  variant = "default",
+  onConfirm,
+  onCancel,
+  loading,
+}: ConfirmDialogProps) => {
+  const [pending, setPending] = React.useState(false);
+
+  if (!open) return null;
+
+  const handleConfirm = async () => {
+    setPending(true);
+    try {
+      await onConfirm?.();
+      onOpenChange?.(false);
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const handleCancel = () => {
+    onCancel?.();
+    onOpenChange?.(false);
+  };
+
+  const isBusy = pending || loading;
+
+  return (
+    <div className="atlas-confirm-dialog fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="fixed inset-0 bg-black/50 animate-in fade-in-0"
+        onClick={handleCancel}
+        aria-hidden="true"
+      />
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="confirm-title"
+        aria-describedby="confirm-description"
+        className={cn(
+          "relative z-10 w-full max-w-sm rounded-xl border border-border bg-background p-6 shadow-xl",
+          "animate-in fade-in-0 zoom-in-95"
+        )}
+      >
+        <div className="flex items-start gap-4">
+          <div className={cn(
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+            variant === "danger" ? "bg-destructive/10" : "bg-primary/10"
+          )}>
+            {variant === "danger" ? (
+              <svg className="h-5 w-5 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            ) : (
+              <svg className="h-5 w-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            )}
+          </div>
+          <div>
+            <h2 id="confirm-title" className="text-base font-semibold">{title}</h2>
+            <p id="confirm-description" className="mt-1 text-sm text-muted-foreground">{description}</p>
+          </div>
+        </div>
+        <div className="mt-6 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={handleCancel}
+            disabled={isBusy}
+            className="inline-flex h-9 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50"
+          >
+            {cancelLabel}
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={isBusy}
+            className={cn(
+              "inline-flex h-9 items-center justify-center gap-2 rounded-md px-4 text-sm font-medium transition-colors disabled:opacity-50",
+              variant === "danger"
+                ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                : "bg-primary text-primary-foreground hover:bg-primary/90"
+            )}
+          >
+            {isBusy && (
+              <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            )}
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+ConfirmDialog.displayName = "ConfirmDialog";
+
+// ─── FloatingActionButton ─────────────────────────────────────────────────
+
+export interface FABAction {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
+
+export interface FloatingActionButtonProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onClick" | "size"> {
+  icon?: React.ReactNode;
+  label?: string;
+  actions?: FABAction[];
+  position?: "bottom-right" | "bottom-left" | "bottom-center";
+  size?: "sm" | "md" | "lg";
+  onClick?: () => void;
+}
+
+const positionMap = {
+  "bottom-right":  "fixed bottom-6 right-6 z-40",
+  "bottom-left":   "fixed bottom-6 left-6 z-40",
+  "bottom-center": "fixed bottom-6 left-1/2 -translate-x-1/2 z-40",
+};
+
+const fabSizes = {
+  sm: "h-12 w-12 [&>svg]:h-5 [&>svg]:w-5",
+  md: "h-14 w-14 [&>svg]:h-6 [&>svg]:w-6",
+  lg: "h-16 w-16 [&>svg]:h-7 [&>svg]:w-7",
+};
+
+const FloatingActionButton = React.forwardRef<HTMLDivElement, FloatingActionButtonProps>(
+  ({ className, icon, label = "Open actions", actions = [], position = "bottom-right", size = "md", onClick, ...props }, ref) => {
+    const [open, setOpen] = React.useState(false);
+    const hasActions = actions.length > 0;
+
+    return (
+      <div
+        ref={ref}
+        className={cn(positionMap[position], "flex flex-col-reverse items-center gap-3", className)}
+        {...props}
+      >
+        {hasActions && open && (
+          <div className="flex flex-col-reverse gap-2">
+            {actions.map((action, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="rounded-md bg-foreground/90 px-2 py-1 text-xs text-background font-medium shadow whitespace-nowrap">
+                  {action.label}
+                </span>
+                <button
+                  type="button"
+                  disabled={action.disabled}
+                  onClick={() => { action.onClick(); setOpen(false); }}
+                  aria-label={action.label}
+                  className={cn(
+                    "flex h-10 w-10 items-center justify-center rounded-full bg-background border border-border",
+                    "shadow-md text-foreground hover:bg-accent transition-all",
+                    "[&>svg]:h-4 [&>svg]:w-4",
+                    "disabled:opacity-50 disabled:pointer-events-none"
+                  )}
+                >
+                  {action.icon}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <button
+          type="button"
+          aria-label={label}
+          aria-expanded={hasActions ? open : undefined}
+          onClick={hasActions ? () => setOpen(!open) : onClick}
+          className={cn(
+            "flex items-center justify-center rounded-full",
+            "bg-primary text-primary-foreground shadow-lg",
+            "hover:bg-primary/90 active:scale-95 transition-all",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            fabSizes[size]
+          )}
+        >
+          {icon ?? (
+            <svg
+              className={cn("transition-transform duration-200", hasActions && open && "rotate-45")}
+              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              style={{ width: "1.5rem", height: "1.5rem" }}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          )}
+        </button>
+      </div>
+    );
+  }
+);
+FloatingActionButton.displayName = "FloatingActionButton";
+
+// ─── RichTooltip ──────────────────────────────────────────────────────────
+
+export interface RichTooltipProps {
+  children: React.ReactNode;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  action?: React.ReactNode;
+  side?: "top" | "right" | "bottom" | "left";
+  open?: boolean;
+  defaultOpen?: boolean;
+  delayDuration?: number;
+}
+
+const RichTooltip = ({
+  children,
+  title,
+  description,
+  action,
+  side = "top",
+  open: controlledOpen,
+  defaultOpen = false,
+  delayDuration = 400,
+}: RichTooltipProps) => {
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
+  const isOpen = controlledOpen ?? internalOpen;
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const show = () => {
+    timeoutRef.current = setTimeout(() => setInternalOpen(true), delayDuration);
+  };
+  const hide = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setInternalOpen(false);
+  };
+
+  const positionClasses: Record<string, string> = {
+    top:    "bottom-full left-1/2 -translate-x-1/2 mb-2",
+    bottom: "top-full left-1/2 -translate-x-1/2 mt-2",
+    left:   "right-full top-1/2 -translate-y-1/2 mr-2",
+    right:  "left-full top-1/2 -translate-y-1/2 ml-2",
+  };
+
+  return (
+    <div
+      className="atlas-rich-tooltip relative inline-flex"
+      onMouseEnter={show}
+      onMouseLeave={hide}
+      onFocus={show}
+      onBlur={hide}
+    >
+      {children}
+      {isOpen && (
+        <div
+          role="tooltip"
+          className={cn(
+            "absolute z-50 w-64 rounded-lg border border-border bg-popover p-3 shadow-lg",
+            "animate-in fade-in-0 zoom-in-95",
+            positionClasses[side]
+          )}
+        >
+          {title && <p className="text-sm font-semibold mb-1">{title}</p>}
+          {description && <p className="text-xs text-muted-foreground leading-relaxed">{description}</p>}
+          {action && <div className="mt-2 pt-2 border-t border-border">{action}</div>}
+        </div>
+      )}
+    </div>
+  );
+};
+RichTooltip.displayName = "RichTooltip";
+
+// ─── Tour ─────────────────────────────────────────────────────────────────
+
+export interface TourStep {
+  target?: string;
+  title: string;
+  description: React.ReactNode;
+  placement?: "top" | "bottom" | "left" | "right";
+}
+
+export interface TourProps {
+  steps: TourStep[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onComplete?: () => void;
+  currentStep?: number;
+  onStepChange?: (step: number) => void;
+}
+
+const Tour = ({
+  steps,
+  open,
+  onOpenChange,
+  onComplete,
+  currentStep: controlledStep,
+  onStepChange,
+}: TourProps) => {
+  const [internalStep, setInternalStep] = React.useState(0);
+  const step = controlledStep ?? internalStep;
+  const current = steps[step];
+
+  if (!open || !current) return null;
+
+  const goNext = () => {
+    if (step < steps.length - 1) {
+      const next = step + 1;
+      onStepChange?.(next);
+      setInternalStep(next);
+    } else {
+      onComplete?.();
+      onOpenChange?.(false);
+    }
+  };
+
+  const goPrev = () => {
+    if (step > 0) {
+      const prev = step - 1;
+      onStepChange?.(prev);
+      setInternalStep(prev);
+    }
+  };
+
+  return (
+    <div className="atlas-tour fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="fixed inset-0 bg-black/40 animate-in fade-in-0"
+        onClick={() => onOpenChange?.(false)}
+        aria-hidden="true"
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Tour step ${step + 1} of ${steps.length}: ${current.title}`}
+        className="relative z-10 w-full max-w-sm rounded-xl border border-border bg-background p-5 shadow-xl animate-in fade-in-0 zoom-in-95"
+      >
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs font-medium text-muted-foreground">
+            Step {step + 1} of {steps.length}
+          </span>
+          <button
+            type="button"
+            onClick={() => onOpenChange?.(false)}
+            aria-label="Close tour"
+            className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <h3 className="text-base font-semibold mb-1">{current.title}</h3>
+        <div className="text-sm text-muted-foreground">{current.description}</div>
+
+        <div className="mt-5 flex items-center justify-between gap-3">
+          <div className="flex gap-1">
+            {steps.map((_, i) => (
+              <span
+                key={i}
+                className={cn(
+                  "h-1.5 rounded-full transition-all",
+                  i === step ? "w-4 bg-primary" : "w-1.5 bg-muted"
+                )}
+              />
+            ))}
+          </div>
+          <div className="flex gap-2">
+            {step > 0 && (
+              <button
+                type="button"
+                onClick={goPrev}
+                className="h-8 px-3 rounded-md border border-border text-sm hover:bg-accent transition-colors"
+              >
+                Back
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={goNext}
+              className="h-8 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              {step === steps.length - 1 ? "Done" : "Next"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+Tour.displayName = "Tour";
+
+export { BannerAlert, ConfirmDialog, FloatingActionButton, RichTooltip, Tour };
+export type { FABAction };
+
 export {
+
   Alert, AlertTitle, AlertDescription,
   ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose, ToastAction,
   Snackbar,
@@ -551,4 +1049,6 @@ export {
   EmptyState,
   StatusIndicator,
   Notification,
+,
+  BannerAlert, ConfirmDialog, FloatingActionButton, RichTooltip, Tour
 };

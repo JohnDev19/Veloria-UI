@@ -8,7 +8,8 @@ This project follows [Semantic Versioning](https://semver.org).
 ---
 
 ## [0.1.0] — 2024-06-28
-## [0.1.0] — 2025-03-13 (UPDATED)
+## [0.1.1] — 2026-03-13 (UPDATED)
+## [0.1.2] – 2026-03-15 (UPDATED)
 
 ### 🎉 Initial Release
 
@@ -154,4 +155,3 @@ plugin, and a complete CSS token system with light + dark mode.
 
 ---
 
-[0.1.0]: https://github.com/JohnDev19/AtlasUI/releases/tag/v0.1.0

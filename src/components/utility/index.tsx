@@ -408,4 +408,160 @@ const DragDropArea = React.forwardRef<HTMLDivElement, DragDropAreaProps>(
 );
 DragDropArea.displayName = "DragDropArea";
 
-export { ThemeSwitcher, CopyButton, KeyboardShortcut, ResizablePanel, DragDropArea };
+
+// ═══════════════════════════════════════════════════════════════
+// New in v0.1.2
+// ═══════════════════════════════════════════════════════════════
+
+
+// ─── InfiniteScroll ───────────────────────────────────────────────────────
+
+export interface InfiniteScrollProps extends React.HTMLAttributes<HTMLDivElement> {
+  onLoadMore: () => void | Promise<void>;
+  hasMore: boolean;
+  loading?: boolean;
+  threshold?: number;
+  loader?: React.ReactNode;
+  endMessage?: React.ReactNode;
+  as?: React.ElementType;
+}
+
+const DefaultLoader = () => (
+  <div className="flex justify-center py-4">
+    <svg className="h-5 w-5 animate-spin text-muted-foreground" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  </div>
+);
+
+const InfiniteScroll = React.forwardRef<HTMLDivElement, InfiniteScrollProps>(
+  ({
+    className,
+    children,
+    onLoadMore,
+    hasMore,
+    loading,
+    threshold = 100,
+    loader,
+    endMessage,
+    as: Comp = "div",
+    ...props
+  }, ref) => {
+    const sentinelRef = React.useRef<HTMLDivElement>(null);
+    const loadingRef = React.useRef(false);
+
+    React.useEffect(() => {
+      const sentinel = sentinelRef.current;
+      if (!sentinel) return;
+
+      const observer = new IntersectionObserver(
+        async (entries) => {
+          const entry = entries[0];
+          if (entry.isIntersecting && hasMore && !loadingRef.current && !loading) {
+            loadingRef.current = true;
+            await onLoadMore();
+            loadingRef.current = false;
+          }
+        },
+        { rootMargin: `${threshold}px` }
+      );
+
+      observer.observe(sentinel);
+      return () => observer.disconnect();
+    }, [hasMore, loading, onLoadMore, threshold]);
+
+    return (
+      <Comp
+        ref={ref}
+        className={cn("atlas-infinite-scroll", className)}
+        {...props}
+      >
+        {children}
+        <div ref={sentinelRef} aria-hidden="true" />
+        {loading && (loader ?? <DefaultLoader />)}
+        {!hasMore && endMessage && (
+          <div className="py-4 text-center text-sm text-muted-foreground">
+            {endMessage}
+          </div>
+        )}
+      </Comp>
+    );
+  }
+);
+InfiniteScroll.displayName = "InfiniteScroll";
+
+// ─── VirtualList ──────────────────────────────────────────────────────────
+
+export interface VirtualListProps<T> extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+  items: T[];
+  itemHeight: number;
+  renderItem: (item: T, index: number) => React.ReactNode;
+  overscan?: number;
+  height?: number | string;
+  getItemKey?: (item: T, index: number) => string | number;
+}
+
+function VirtualList<T>({
+  className,
+  items,
+  itemHeight,
+  renderItem,
+  overscan = 3,
+  height = 400,
+  getItemKey,
+  style,
+  ...props
+}: VirtualListProps<T>) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [scrollTop, setScrollTop] = React.useState(0);
+
+  const containerHeight = typeof height === "number" ? height : 400;
+  const totalHeight = items.length * itemHeight;
+
+  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+  const visibleCount = Math.ceil(containerHeight / itemHeight) + overscan * 2;
+  const endIndex = Math.min(items.length - 1, startIndex + visibleCount);
+
+  const visibleItems = items.slice(startIndex, endIndex + 1);
+
+  return (
+    <div
+      ref={containerRef}
+      role="list"
+      className={cn("atlas-virtual-list overflow-y-auto relative", className)}
+      style={{ height, ...style }}
+      onScroll={(e) => setScrollTop((e.target as HTMLDivElement).scrollTop)}
+      {...props}
+    >
+      <div style={{ height: totalHeight, position: "relative" }}>
+        {visibleItems.map((item, i) => {
+          const actualIndex = startIndex + i;
+          return (
+            <div
+              key={getItemKey ? getItemKey(item, actualIndex) : actualIndex}
+              role="listitem"
+              style={{
+                position: "absolute",
+                top: actualIndex * itemHeight,
+                left: 0,
+                right: 0,
+                height: itemHeight,
+              }}
+            >
+              {renderItem(item, actualIndex)}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+VirtualList.displayName = "VirtualList";
+
+export { InfiniteScroll, VirtualList };
+
+export {
+ ThemeSwitcher, CopyButton, KeyboardShortcut, ResizablePanel, DragDropArea ,
+  InfiniteScroll, VirtualList
+};

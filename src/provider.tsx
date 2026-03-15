@@ -6,7 +6,7 @@
  *
  * Usage in app/layout.tsx:
  *
- *   import { AtlasProvider } from "atlasui-kit/provider";
+ *   import { AtlasProvider } from "atlasui/provider";
  *
  *   export default function RootLayout({ children }) {
  *     return (

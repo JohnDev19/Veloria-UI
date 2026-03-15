@@ -17,7 +17,7 @@ plugin, and a complete CSS token system with light + dark mode.
 
 ---
 
-#### atlasui-kit
+#### atlasui
 
 **Basic (10)**
 - `Button` — solid, outline, ghost, soft, link, danger variants · sizes xs–xl · loading state · left/right icon slots
@@ -145,7 +145,7 @@ plugin, and a complete CSS token system with light + dark mode.
 - Tree-shakeable ESM + CJS dual build via tsup
 - Turbo monorepo setup
 
-#### atlasui-kit CLI
+#### atlasui CLI
 - `init` — project setup wizard (detects Next.js, writes atlas.config.json)
 - `add` — copies components + installs npm deps, resolves AtlasUI peer deps
 - `list` — browse all 90 components filtered by category

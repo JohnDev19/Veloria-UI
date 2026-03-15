@@ -301,7 +301,7 @@ ListItem.displayName = "ListItem";
 
 // ─── Statistic ────────────────────────────────────────────────────────────
 
-export interface StatisticProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface StatisticProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "prefix"> {
   label: React.ReactNode;
   value: React.ReactNode;
   prefix?: React.ReactNode;
@@ -395,7 +395,7 @@ Timeline.displayName = "Timeline";
 
 // ─── Calendar ─────────────────────────────────────────────────────────────
 
-export interface CalendarProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface CalendarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
   value?: Date;
   onChange?: (date: Date) => void;
   minDate?: Date;
@@ -416,9 +416,10 @@ const Calendar = React.forwardRef<HTMLDivElement, CalendarProps>(
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    const cells = Array.from({ length: firstDay }, () => null).concat(
-      Array.from({ length: daysInMonth }, (_, i) => new Date(year, month, i + 1))
-    );
+    const cells: (Date | null)[] = [
+      ...Array.from({ length: firstDay }, (): null => null),
+      ...Array.from({ length: daysInMonth }, (_, i) => new Date(year, month, i + 1)),
+    ];
 
     const isSameDay = (a: Date, b: Date) =>
       a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -564,7 +565,7 @@ CodeBlock.displayName = "CodeBlock";
 
 // ─── Chart (placeholder - integrates with recharts/chartjs) ───────────────
 
-export interface ChartProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ChartProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   title?: string;
   description?: string;
   loading?: boolean;

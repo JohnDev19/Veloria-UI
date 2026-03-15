@@ -5,7 +5,7 @@ import { cn } from "../../utils/cn";
 
 export type Theme = "light" | "dark" | "system";
 
-export interface ThemeSwitcherProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "color"> {
+export interface ThemeSwitcherProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "color" | "onChange"> {
   value?: Theme;
   onChange?: (theme: Theme) => void;
   variant?: "icon" | "toggle" | "select";
@@ -301,7 +301,7 @@ ResizablePanel.displayName = "ResizablePanel";
 
 // ─── DragDropArea ──────────────────────────────────────────────────────────
 
-export interface DragDropAreaProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface DragDropAreaProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onDrop" | "onDragOver"> {
   onDrop?: (items: DataTransfer) => void;
   onDragOver?: (e: React.DragEvent) => void;
   accept?: string[];

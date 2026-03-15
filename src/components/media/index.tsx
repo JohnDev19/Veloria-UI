@@ -160,7 +160,7 @@ VideoPlayer.displayName = "VideoPlayer";
 
 // ─── AudioPlayer ───────────────────────────────────────────────────────────
 
-export interface AudioPlayerProps extends React.AudioHTMLAttributes<HTMLAudioElement> {
+export interface AudioPlayerProps extends Omit<React.AudioHTMLAttributes<HTMLAudioElement>, "title"> {
   src: string;
   title?: string;
   artist?: string;

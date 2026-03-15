@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * atlasui-kit CLI
+ * atlasui CLI
  *
  * Copies AtlasUI components into your project so you own the code.
  * Works exactly like shadcn/ui's CLI — pick what you want, paste it in.
@@ -42,7 +42,7 @@ const program = new Command();
 
 program
   .name("atlasui")
-  .description("atlasui-kit CLI — copy components into your project")
+  .description("atlasui CLI — copy components into your project")
   .version("0.1.0", "-v, --version")
   .addHelpText("before", banner);
 
@@ -50,7 +50,7 @@ program
 
 program
   .command("init")
-  .description("Set up atlasui-kit in your project")
+  .description("Set up atlasui in your project")
   .option("--typescript", "Use TypeScript", true)
   .option("--tailwind", "Configure Tailwind", true)
   .option("--no-install", "Skip dependency install")
@@ -149,7 +149,7 @@ program
       process.exit(1);
     }
 
-    // Resolve components + their atlasui-kit registry deps
+    // Resolve components + their atlasui registry deps
     const toAdd = new Set<string>();
     function resolve(name: string) {
       const key = name.toLowerCase().replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
@@ -194,16 +194,16 @@ program
 `/**
  * AtlasUI — ${pascal}
  *
- * Added by the atlasui-kit CLI. This file is yours — edit it however you want.
- * Re-export from atlasui-kit to stay in sync, or paste the full source here
+ * Added by the atlasui CLI. This file is yours — edit it however you want.
+ * Re-export from atlasui to stay in sync, or paste the full source here
  * to customise the internals.
  *
  * Docs:   https://atlasui.vercel.app/components/${name}
  * Source: https://github.com/JohnDev19/AtlasUI
  */
 
-export { ${pascal} } from "atlasui-kit";
-export type { ${pascal}Props } from "atlasui-kit";
+export { ${pascal} } from "atlasui";
+export type { ${pascal}Props } from "atlasui";
 `);
       spinner.succeed(chalk.green(`${name}  →  ${path.relative(cwd, file)}`));
     }
@@ -239,7 +239,7 @@ program
   .option("-c, --category <category>", "Filter by category")
   .action((opts) => {
     const filterCat = opts.category?.toLowerCase() as Category | undefined;
-    console.log(chalk.bold.blue("\n  atlasui-kit Components\n"));
+    console.log(chalk.bold.blue("\n  atlasui Components\n"));
 
     const cats = filterCat ? [filterCat] : CATEGORIES;
     for (const cat of cats) {
@@ -268,7 +268,7 @@ program
       return;
     }
     console.log(chalk.bold.blue(`\n  diff: ${component}\n`) +
-      chalk.dim("  Comparing local copy to latest in the atlasui-kit registry…\n"));
+      chalk.dim("  Comparing local copy to latest in the atlasui registry…\n"));
     // Full diff requires fetching from the registry — tracked here:
     // https://github.com/JohnDev19/AtlasUI/issues
     console.log(chalk.yellow("  ⚠  Registry diff isn't wired up yet."));

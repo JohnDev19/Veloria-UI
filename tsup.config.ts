@@ -43,7 +43,7 @@ export default defineConfig([
     outDir: "dist",
     banner: {
       js: `/**
- * atlasui-kit v0.1.0
+ * atlasui v0.1.0
  * Build anything. Ship faster.
  * By JohnDev19 — https://github.com/JohnDev19/AtlasUI
  * MIT License

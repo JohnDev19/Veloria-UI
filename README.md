@@ -13,7 +13,7 @@
 90+ production-ready React components — accessible, composable, dark-mode ready.
 Works with Tailwind CSS and Next.js out of the box.
 
-[![npm](https://img.shields.io/npm/v/atlasui-kit?color=0ea5e9&label=atlasui-kit)](https://www.npmjs.com/package/atlasui-kit)
+[![npm](https://img.shields.io/npm/v/atlasui?color=0ea5e9&label=atlasui)](https://www.npmjs.com/package/atlasui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178c6)](https://www.typescriptlang.org)
 [![GitHub](https://img.shields.io/github/stars/JohnDev19/AtlasUI?style=social)](https://github.com/JohnDev19/AtlasUI)
@@ -27,9 +27,9 @@ Works with Tailwind CSS and Next.js out of the box.
 ## Install
 
 ```bash
-npm install atlasui-kit
-# pnpm add atlasui-kit
-# bun add atlasui-kit
+npm install atlasui
+# pnpm add atlasui
+# bun add atlasui
 ```
 
 ---
@@ -40,14 +40,14 @@ npm install atlasui-kit
 
 ```tsx
 // app/layout.tsx
-import "atlasui-kit/styles";
+import "atlasui/styles";
 ```
 
 ### 2. Add the Tailwind plugin
 
 ```ts
 // tailwind.config.ts
-import { atlasPlugin } from "atlasui-kit/tailwind";
+import { atlasPlugin } from "atlasui/tailwind";
 
 export default {
   darkMode: ["class"],
@@ -60,7 +60,7 @@ export default {
 
 ```tsx
 // app/layout.tsx
-import { AtlasProvider } from "atlasui-kit/provider";
+import { AtlasProvider } from "atlasui/provider";
 
 export default function RootLayout({ children }) {
   return (
@@ -76,7 +76,7 @@ export default function RootLayout({ children }) {
 ### 4. Start building
 
 ```tsx
-import { Button, Card, CardContent, Input, Badge } from "atlasui-kit";
+import { Button, Card, CardContent, Input, Badge } from "atlasui";
 
 export default function Page() {
   return (
@@ -95,25 +95,25 @@ export default function Page() {
 
 ## CLI
 
-atlasui-kit ships with a CLI that copies components straight into your project — shadcn-style. You own the code.
+atlasui ships with a CLI that copies components straight into your project — shadcn-style. You own the code.
 
 ```bash
-# Set up atlasui-kit in your project (writes atlas.config.json)
-npx atlasui-kit init
+# Set up atlasui in your project (writes atlas.config.json)
+npx atlasui init
 
 # Add components
-npx atlasui-kit add button
-npx atlasui-kit add card modal drawer toast
+npx atlasui add button
+npx atlasui add card modal drawer toast
 
 # Browse all 90 components
-npx atlasui-kit list
-npx atlasui-kit list --category forms
+npx atlasui list
+npx atlasui list --category forms
 
 # Compare your local copy to the latest version
-npx atlasui-kit diff button
+npx atlasui diff button
 ```
 
-After running `add`, a file like `components/ui/button/index.tsx` appears in your project. It re-exports from `atlasui-kit` by default, or you can paste the full source in and go wild.
+After running `add`, a file like `components/ui/button/index.tsx` appears in your project. It re-exports from `atlasui` by default, or you can paste the full source in and go wild.
 
 ---
 
@@ -166,7 +166,7 @@ import {
   useKeydown,        // keyboard shortcut listener with modifier support
   useMounted,        // SSR-safe mount check
   useToast,          // fire toasts programmatically
-} from "atlasui-kit";
+} from "atlasui";
 ```
 
 ---
@@ -195,7 +195,7 @@ Full token list: `--background` `--foreground` `--primary` `--secondary` `--mute
 Uses the `class` strategy — add `dark` to `<html>` and everything flips automatically.
 
 ```tsx
-import { useTheme, ThemeSwitcher } from "atlasui-kit";
+import { useTheme, ThemeSwitcher } from "atlasui";
 
 function Header() {
   const { theme, setTheme } = useTheme();
@@ -208,7 +208,7 @@ function Header() {
 ## Package Structure
 
 ```
-atlasui-kit/
+atlasui/
 ├── src/
 │   ├── components/
 │   │   ├── basic/           Button, IconButton, Badge, Avatar, Tooltip…

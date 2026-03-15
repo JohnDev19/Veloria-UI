@@ -404,7 +404,7 @@ LoadingSpinner.displayName = "LoadingSpinner";
 
 // ─── EmptyState ───────────────────────────────────────────────────────────
 
-export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface EmptyStateProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   icon?: React.ReactNode;
   title: string;
   description?: string;
@@ -486,7 +486,7 @@ StatusIndicator.displayName = "StatusIndicator";
 
 // ─── Notification ─────────────────────────────────────────────────────────
 
-export interface NotificationProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface NotificationProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   title: React.ReactNode;
   description?: React.ReactNode;
   avatar?: React.ReactNode;

@@ -12,7 +12,7 @@ export interface ComponentMeta {
   category: Category;
   description: string;
   deps: string[];
-  /** Other atlasui-kit components this one depends on */
+  /** Other atlasui components this one depends on */
   registryDeps?: string[];
 }
 

@@ -1,5 +1,5 @@
 {
-  "name": "atlasui-kit",
+  "name": "atlasui",
   "version": "0.1.0",
   "private": false,
   "description": "AtlasUI — Build anything. Ship faster. 90+ accessible, composable React components with Tailwind CSS and dark mode.",
@@ -8,7 +8,7 @@
     "ui",
     "components",
     "atlasui",
-    "atlasui-kit",
+    "atlasui",
     "design-system",
     "accessible",
     "aria",

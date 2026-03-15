@@ -12,7 +12,7 @@
  * Commands:
  *   veloria-ui init                    — project setup wizard
  *   veloria-ui add button card modal   — copy components into your project
- *   veloria-ui list                    — browse all 90 components
+ *   veloria-ui list                    — browse all 102 components
  *   veloria-ui list --category forms   — filter by category
  *   veloria-ui diff button             — compare local vs latest
  */

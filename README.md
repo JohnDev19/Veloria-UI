@@ -10,7 +10,7 @@
 
 ### **Build anything. Ship faster.**
 
-90+ production-ready React components — accessible, composable, dark-mode ready.
+102 production-ready React components — accessible, composable, dark-mode ready.
 Works with Tailwind CSS and Next.js out of the box.
 
 [![npm](https://img.shields.io/npm/v/veloria-ui?color=0ea5e9&label=veloria-ui)](https://www.npmjs.com/package/veloria-ui)
@@ -105,7 +105,7 @@ npx veloria-ui init
 npx veloria-ui add button
 npx veloria-ui add card modal drawer toast
 
-# Browse all 90 components
+# Browse all 102 components
 npx veloria-ui list
 npx veloria-ui list --category forms
 
@@ -221,7 +221,7 @@ veloria-ui/
 │   │   ├── overlay/         Modal, Drawer, CommandDialog, Lightbox…
 │   │   ├── media/           VideoPlayer, AudioPlayer, Carousel, Gallery…
 │   │   └── utility/         ThemeSwitcher, CopyButton, ResizablePanel…
-│   ├── hooks/               10 utility hooks
+│   ├── hooks/               18 utility hooks
 │   ├── styles/              atlas.css — full design token system
 │   ├── types/               shared TypeScript types
 │   ├── utils/               cn() and helpers

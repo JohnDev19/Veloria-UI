@@ -2,7 +2,7 @@
  * veloria-ui
  *
  * Build anything. Ship faster.
- * 90+ production-ready components — accessible, composable, dark-mode ready.
+ * 102 production-ready components — accessible, composable, dark-mode ready.
  *
  * By JohnDev19 — https://github.com/JohnDev19/Veloria-UI
  * Docs: https://veloria-ui.vercel.app/

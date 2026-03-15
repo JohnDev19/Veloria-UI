@@ -15,7 +15,7 @@ npm run build
 
 ## Repo structure
 
-- `packages/core` — the `@veloria-ui/core` npm package (all 90 components live here)
+- `packages/core` — the `@veloria-ui/core` npm package (all 102 components live here)
 - `cli` — the `@veloria-ui/cli` npm package
 
 ## Adding a new component

@@ -11,7 +11,7 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ### Initial Release
 
-First public release of Veloria UI. 90 components, a full CLI, 10 hooks, a Tailwind
+First public release of Veloria UI. 102 components, a full CLI, 18 hooks, a Tailwind
 plugin, and a complete CSS token system with light + dark mode.
 
 ---
@@ -147,7 +147,7 @@ plugin, and a complete CSS token system with light + dark mode.
 #### veloria-ui CLI
 - `init` — project setup wizard (detects Next.js, writes atlas.config.json)
 - `add` — copies components + installs npm deps, resolves Veloria UI peer deps
-- `list` — browse all 90 components filtered by category
+- `list` — browse all 102 components filtered by category
 - `diff` — compare local copy to latest (registry fetch, coming soon)
 - Auto-detects npm / pnpm / yarn / bun
 

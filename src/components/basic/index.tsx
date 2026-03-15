@@ -101,7 +101,7 @@ const badgeVariants = cva(
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
+  extends Omit<React.HTMLAttributes<HTMLSpanElement>, "color">,
     VariantProps<typeof badgeVariants> {
   dot?: boolean;
 }
@@ -187,7 +187,7 @@ Avatar.displayName = "Avatar";
 
 // ─── AvatarGroup ──────────────────────────────────────────────────────────
 
-export interface AvatarGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface AvatarGroupProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "size"> {
   max?: number;
   size?: AvatarProps["size"];
   spacing?: "tight" | "normal" | "loose";
@@ -282,7 +282,7 @@ Divider.displayName = "Divider";
 
 // ─── Tag ──────────────────────────────────────────────────────────────────
 
-export interface TagProps extends React.HTMLAttributes<HTMLSpanElement> {
+export interface TagProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "color" | "size"> {
   closable?: boolean;
   onClose?: () => void;
   icon?: React.ReactNode;

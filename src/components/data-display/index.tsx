@@ -250,7 +250,7 @@ DataTable.displayName = "DataTable";
 
 // ─── List & ListItem ─────────────────────────────────────────────────────
 
-export interface ListProps extends React.HTMLAttributes<HTMLUListElement> {
+export interface ListProps extends Omit<React.HTMLAttributes<HTMLUListElement>, "color"> {
   variant?: "simple" | "bordered" | "divided";
   spacing?: "none" | "sm" | "md" | "lg";
 }

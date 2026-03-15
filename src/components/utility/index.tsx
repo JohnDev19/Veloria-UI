@@ -5,7 +5,7 @@ import { cn } from "../../utils/cn";
 
 export type Theme = "light" | "dark" | "system";
 
-export interface ThemeSwitcherProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ThemeSwitcherProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "color"> {
   value?: Theme;
   onChange?: (theme: Theme) => void;
   variant?: "icon" | "toggle" | "select";
@@ -174,7 +174,7 @@ CopyButton.displayName = "CopyButton";
 
 // ─── KeyboardShortcut ──────────────────────────────────────────────────────
 
-export interface KeyboardShortcutProps extends React.HTMLAttributes<HTMLSpanElement> {
+export interface KeyboardShortcutProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "color" | "size"> {
   keys: string[];
   separator?: string;
   size?: "sm" | "md" | "lg";

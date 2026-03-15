@@ -172,7 +172,7 @@ ToastAction.displayName = ToastPrimitive.Action.displayName;
 
 // ─── Snackbar ─────────────────────────────────────────────────────────────
 
-export interface SnackbarProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface SnackbarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "color"> {
   open?: boolean;
   message: React.ReactNode;
   action?: React.ReactNode;
@@ -335,7 +335,7 @@ CircularProgress.displayName = "CircularProgress";
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────
 
-export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface SkeletonProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "color"> {
   variant?: "text" | "rect" | "circle";
   width?: string | number;
   height?: string | number;
@@ -438,7 +438,7 @@ EmptyState.displayName = "EmptyState";
 
 // ─── StatusIndicator ──────────────────────────────────────────────────────
 
-export interface StatusIndicatorProps extends React.HTMLAttributes<HTMLSpanElement> {
+export interface StatusIndicatorProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "color" | "size"> {
   status: "online" | "offline" | "busy" | "away" | "idle";
   label?: string;
   pulse?: boolean;

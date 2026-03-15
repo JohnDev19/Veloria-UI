@@ -416,7 +416,7 @@ RangeSlider.displayName = "RangeSlider";
 
 // ─── DatePicker ───────────────────────────────────────────────────────────
 
-export interface DatePickerProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
+export interface DatePickerProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
   label?: string;
   invalid?: boolean;
 }
@@ -443,7 +443,7 @@ DatePicker.displayName = "DatePicker";
 
 // ─── TimePicker ───────────────────────────────────────────────────────────
 
-export interface TimePickerProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
+export interface TimePickerProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
   label?: string;
   invalid?: boolean;
 }

@@ -214,7 +214,7 @@ ColorPicker.displayName = "ColorPicker";
 
 // ─── SearchInput ──────────────────────────────────────────────────────────
 
-export interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
+export interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
   onClear?: () => void;
   loading?: boolean;
   size?: "sm" | "md" | "lg";
@@ -271,7 +271,7 @@ SearchInput.displayName = "SearchInput";
 
 // ─── PasswordInput ────────────────────────────────────────────────────────
 
-export interface PasswordInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
+export interface PasswordInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
   invalid?: boolean;
   size?: "sm" | "md" | "lg";
 }

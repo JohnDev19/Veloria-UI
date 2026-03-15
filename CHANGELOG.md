@@ -8,10 +8,8 @@ This project follows [Semantic Versioning](https://semver.org).
 ---
 
 ## [0.1.0] — 2024-06-28
-## [0.1.1] — 2026-03-13 (UPDATED)
-## [0.1.2] – 2026-03-15 (UPDATED)
 
-### 🎉 Initial Release
+### Initial Release
 
 First public release of AtlasUI. 90 components, a full CLI, 10 hooks, a Tailwind
 plugin, and a complete CSS token system with light + dark mode.
@@ -155,3 +153,54 @@ plugin, and a complete CSS token system with light + dark mode.
 
 ---
 
+---
+
+## [0.1.1] — 2026-03-13 (UPDATED)
+
+### Build fixes
+
+- Fixed `tailwindcss/plugin` resolve error — marked as external in tsup, switched to `require()` at runtime
+- Fixed `"types"` export condition ordering in `package.json` — `types` now comes before `import`/`require`
+- Fixed `use-toast.ts` renamed to `use-toast.tsx` — file contained JSX but had `.ts` extension
+- Fixed `TS2320` / `TS2322` conflicts across all component interfaces — `HTMLAttributes` built-in props (`color`, `size`, `title`, `prefix`, `onChange`, `onDrop`, `onDragOver`) now properly `Omit`-ed before extending
+- Renamed package from `atlasui-kit` to `atlasui-lib`
+- CLI `--version` flag now reads dynamically from `package.json` instead of being hardcoded
+
+---
+
+## [0.1.2] — 2026-03-15 (UPDATED)
+
+### New Components (20)
+
+**Advanced Forms**
+- `PhoneInput` — international phone number with country dial-code selector
+- `TagInput` — type and press Enter to add inline tags, supports max, duplicates control
+- `CurrencyInput` — formatted number input with locale-aware currency symbol
+- `RatingInput` — star rating picker with hover state, clear button, and read-only mode
+
+**Data Display**
+- `StatsCard` — metric card with icon, trend indicator, and loading skeleton
+- `TreeView` — nested expandable tree with keyboard navigation and multi-depth support
+- `JsonViewer` — collapsible syntax-highlighted JSON tree with configurable max depth
+- `Heatmap` — GitHub-style activity grid with value intensity scale
+- `KanbanBoard` — drag-and-drop column board with card tagging and assignee slot
+
+**Feedback and Overlay**
+- `BannerAlert` — full-width top-of-page announcement strip with 4 variants
+- `ConfirmDialog` — opinionated confirmation modal with async confirm support and danger variant
+- `FloatingActionButton` — FAB with expandable speed-dial actions and 3 position presets
+- `RichTooltip` — tooltip with title, description, and action slot
+- `Tour` — multi-step onboarding overlay with dot progress indicator
+
+**Utility**
+- `InfiniteScroll` — IntersectionObserver-based load-more trigger with loader slot
+- `VirtualList` — windowed list renderer for large datasets with configurable overscan
+
+### New Hooks (6)
+
+- `useForm` — form state and validation with touched tracking, no extra dependencies
+- `usePagination` — pagination logic decoupled from UI, with from/to helpers
+- `useIntersection` — IntersectionObserver wrapper with optional `once` mode
+- `useWindowSize` — reactive window width and height, SSR-safe
+- `useStep` — multi-step wizard state with `isFirst`, `isLast`, and progress percentage
+- `useCountdown` — countdown timer with `start`, `pause`, and `reset` controls

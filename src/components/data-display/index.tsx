@@ -1142,8 +1142,6 @@ const KanbanBoard = React.forwardRef<HTMLDivElement, KanbanBoardProps>(
 );
 KanbanBoard.displayName = "KanbanBoard";
 
-export { StatsCard, TreeView, JsonViewer, Heatmap, KanbanBoard };
-export type { TreeNode, JsonValue };
 
 export {
 
@@ -1156,6 +1154,5 @@ export {
   Calendar,
   CodeBlock,
   Chart,
-,
   StatsCard, TreeView, JsonViewer, Heatmap, KanbanBoard
 };

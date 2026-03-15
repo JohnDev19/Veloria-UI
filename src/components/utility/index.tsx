@@ -559,7 +559,6 @@ function VirtualList<T>({
 }
 VirtualList.displayName = "VirtualList";
 
-export { InfiniteScroll, VirtualList };
 
 export {
  ThemeSwitcher, CopyButton, KeyboardShortcut, ResizablePanel, DragDropArea ,

@@ -1034,8 +1034,6 @@ const Tour = ({
 };
 Tour.displayName = "Tour";
 
-export { BannerAlert, ConfirmDialog, FloatingActionButton, RichTooltip, Tour };
-export type { FABAction };
 
 export {
 
@@ -1049,6 +1047,5 @@ export {
   EmptyState,
   StatusIndicator,
   Notification,
-,
   BannerAlert, ConfirmDialog, FloatingActionButton, RichTooltip, Tour
 };

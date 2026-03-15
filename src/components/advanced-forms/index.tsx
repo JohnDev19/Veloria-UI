@@ -958,7 +958,6 @@ const RatingInput = React.forwardRef<HTMLDivElement, RatingInputProps>(
 );
 RatingInput.displayName = "RatingInput";
 
-export { PhoneInput, TagInput, CurrencyInput, RatingInput };
 
 export {
 
@@ -972,6 +971,5 @@ export {
   FormField,
   FormLabel,
   FormError,
-,
   PhoneInput, TagInput, CurrencyInput, RatingInput
 };

@@ -7,12 +7,12 @@
  * Works exactly like shadcn/ui's CLI — pick what you want, paste it in.
  *
  * By JohnDev19 — https://github.com/JohnDev19/Veloria-UI
- * Docs: https://veloria-ui.vercel.app/
+ * Docs: https://ui-veloria.vercel.app/
  *
  * Commands:
  *   veloria-ui init                    — project setup wizard
  *   veloria-ui add button card modal   — copy components into your project
- *   veloria-ui list                    — browse all 102 components
+ *   veloria-ui list                    — browse all components
  *   veloria-ui list --category forms   — filter by category
  *   veloria-ui diff button             — compare local vs latest
  */
@@ -84,15 +84,15 @@ program
 
     if (!answers.componentsDir) return;
 
-    // Write atlas.config.json
-    fs.writeJsonSync(path.join(cwd, "atlas.config.json"), {
-      $schema: "https://veloria-ui.vercel.app/schema.json",
+    // Write veloria.config.json
+    fs.writeJsonSync(path.join(cwd, "veloria.config.json"), {
+      $schema: "https://ui-veloria.vercel.app/schema.json",
       style: "default",
       typescript: opts.typescript ?? true,
       tailwind: { config: "tailwind.config.ts", css: answers.cssPath, baseColor: "slate", cssVariables: true },
       aliases: { components: `@/${answers.componentsDir}`, utils: "@/lib/utils" },
     }, { spaces: 2 });
-    console.log(chalk.green("  ✓ Created atlas.config.json"));
+    console.log(chalk.green("  ✓ Created veloria.config.json"));
 
     // Write lib/utils.ts if missing
     const utilsPath = path.join(cwd, "lib", "utils.ts");
@@ -128,7 +128,7 @@ ${chalk.bold.green("  Veloria UI is ready!")}
   ${chalk.dim("Next steps:")}
   ${chalk.cyan("1.")} Add components: ${chalk.bold("npx veloria-ui add button card modal")}
   ${chalk.cyan("2.")} Browse all:     ${chalk.bold("npx veloria-ui list")}
-  ${chalk.cyan("3.")} Docs:           ${chalk.bold("https://veloria-ui.vercel.app/")}
+  ${chalk.cyan("3.")} Docs:           ${chalk.bold("https://ui-veloria.vercel.app/")}
   ${chalk.cyan("4.")} Issues:         ${chalk.bold("https://github.com/JohnDev19/Veloria-UI/issues")}
 `);
   });
@@ -167,7 +167,7 @@ program
     components.forEach(resolve);
     if (!toAdd.size) return;
 
-    const configPath = path.join(cwd, "atlas.config.json");
+    const configPath = path.join(cwd, "veloria.config.json");
     const config = fs.existsSync(configPath)
       ? fs.readJsonSync(configPath) as { aliases?: { components?: string } }
       : null;
@@ -200,7 +200,7 @@ program
  * Re-export from veloria-ui to stay in sync, or paste the full source here
  * to customise the internals.
  *
- * Docs:   https://veloria-ui.vercel.app/components/${name}
+ * Docs:   https://ui-veloria.vercel.app/components/${name}
  * Source: https://github.com/JohnDev19/Veloria-UI
  */
 
@@ -256,7 +256,7 @@ program
     }
 
     console.log(chalk.dim(`  ${REGISTRY.length} components total\n`) +
-      chalk.dim("  Add one: ") + chalk.cyan("npx veloria-ui add <name>\n"));
+      chalk.dim("  Add one: ") + chalk.cyan("npx veloria-ui add <n>\n"));
   });
 
 // ─── diff ─────────────────────────────────────────────────────────────────

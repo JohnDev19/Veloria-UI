@@ -12,18 +12,18 @@ const plugin = require("tailwindcss/plugin") as (
 /**
  * Veloria UI Tailwind plugin.
  *
- * Maps the CSS custom properties in atlas.css to Tailwind utilities.
+ * Maps the CSS custom properties in veloria.css to Tailwind utilities.
  * Add to your tailwind.config.ts:
  *
- *   import { atlasPlugin } from "veloria-ui/tailwind";
- *   plugins: [atlasPlugin],
+ *   import { veloriaPlugin } from "veloria-ui/tailwind";
+ *   plugins: [veloriaPlugin],
  *
- * Or use atlasPreset which also sets darkMode: ["class"]:
+ * Or use veloriaPreset which also sets darkMode: ["class"]:
  *
- *   import { atlasPreset } from "veloria-ui/tailwind";
- *   presets: [atlasPreset],
+ *   import { veloriaPreset } from "veloria-ui/tailwind";
+ *   presets: [veloriaPreset],
  */
-export const atlasPlugin = plugin(
+export const veloriaPlugin = plugin(
   ({ addBase, addUtilities }) => {
     addBase({
       "*": { "border-color": "hsl(var(--border))" },
@@ -116,9 +116,9 @@ export const atlasPlugin = plugin(
 );
 
 /** Full preset — includes the plugin + darkMode: ["class"]. Recommended for new projects. */
-export const atlasPreset: Partial<Config> = {
+export const veloriaPreset: Partial<Config> = {
   darkMode: ["class"],
-  plugins: [atlasPlugin],
+  plugins: [veloriaPlugin],
 };
 
-export default atlasPlugin;
+export default veloriaPlugin;

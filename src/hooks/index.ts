@@ -152,11 +152,11 @@ export function useLocalStorage<T>(key: string, defaultValue: T): [T, (value: T 
 
 // ─── useTheme ──────────────────────────────────────────────────────────────
 
-export type AtlasTheme = "light" | "dark" | "system";
+export type VeloriaTheme = "light" | "dark" | "system";
 
 /**
  * Read and set the current Veloria UI theme.
- * Persists the selection to localStorage under "atlas-theme".
+ * Persists the selection to localStorage under "veloria-theme".
  * Applies the "dark" class to <html> so Tailwind's dark: utilities kick in.
  *
  * @example
@@ -164,7 +164,7 @@ export type AtlasTheme = "light" | "dark" | "system";
  * <button onClick={() => setTheme("dark")}>Go dark</button>
  */
 export function useTheme() {
-  const [theme, setThemeState] = useLocalStorage<AtlasTheme>("atlas-theme", "system");
+  const [theme, setThemeState] = useLocalStorage<VeloriaTheme>("veloria-theme", "system");
 
   const resolvedTheme = React.useMemo<"light" | "dark">(() => {
     if (theme === "system") {
@@ -177,7 +177,7 @@ export function useTheme() {
     return theme;
   }, [theme]);
 
-  const setTheme = React.useCallback((t: AtlasTheme) => {
+  const setTheme = React.useCallback((t: VeloriaTheme) => {
     setThemeState(t);
     if (typeof document !== "undefined") {
       const root = document.documentElement;

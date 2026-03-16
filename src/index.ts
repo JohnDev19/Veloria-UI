@@ -5,7 +5,7 @@
  * 102 production-ready components — accessible, composable, dark-mode ready.
  *
  * By JohnDev19 — https://github.com/JohnDev19/Veloria-UI
- * Docs: https://veloria-ui.vercel.app/
+ * Docs: https://ui-veloria.vercel.app/
  * Issues: https://github.com/JohnDev19/Veloria-UI/issues
  *
  * @license MIT
@@ -320,7 +320,7 @@ export {
   useMounted,
   useId,
 } from "./hooks";
-export type { UseDisclosureOptions, UseClipboardOptions, AtlasTheme } from "./hooks";
+export type { UseDisclosureOptions, UseClipboardOptions, VeloriaTheme } from "./hooks";
 
 export {
   useToast,
@@ -336,8 +336,8 @@ export type {
   Variant,
   Placement,
   Side,
-  AtlasBaseProps,
-  AtlasAriaProps,
+  VeloriaBaseProps,
+  VeloriaAriaProps,
   AsChildProps,
   Orientation,
   Status,
@@ -349,7 +349,7 @@ export type {
 export { cn, composeEventHandlers, generateId, isBrowser, isDefined, noop } from "./utils/cn";
 
 // ─── Tailwind plugin ──────────────────────────────────────────────────────
-export { atlasPlugin, atlasPreset } from "./tailwind";
+export { veloriaPlugin, veloriaPreset } from "./tailwind";
 
 // ─── v0.1.2 — New Components ─────────────────────────────────────────────
 

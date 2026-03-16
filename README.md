@@ -10,7 +10,7 @@
 
 ### **Build anything. Ship faster.**
 
-102 production-ready React components — accessible, composable, dark-mode ready.
+Production-ready React components — accessible, composable, dark-mode ready.
 Works with Tailwind CSS and Next.js out of the box.
 
 [![npm](https://img.shields.io/npm/v/veloria-ui?color=0ea5e9&label=veloria-ui)](https://www.npmjs.com/package/veloria-ui)
@@ -18,7 +18,7 @@ Works with Tailwind CSS and Next.js out of the box.
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178c6)](https://www.typescriptlang.org)
 [![GitHub](https://img.shields.io/github/stars/JohnDev19/Veloria-UI?style=social)](https://github.com/JohnDev19/Veloria-UI)
 
-**[Docs](https://veloria-ui.vercel.app/)** · **[Components](https://veloria-ui.vercel.app/components)** · **[Issues](https://github.com/JohnDev19/Veloria-UI/issues)** · **[Changelog](CHANGELOG.md)**
+**[Docs](https://ui-veloria.vercel.app/)** · **[Components](https://ui-veloria.vercel.app/components)** · **[Issues](https://github.com/JohnDev19/Veloria-UI/issues)** · **[Changelog](CHANGELOG.md)**
 
 </div>
 
@@ -47,12 +47,12 @@ import "veloria-ui/styles";
 
 ```ts
 // tailwind.config.ts
-import { atlasPlugin } from "veloria-ui/tailwind";
+import { veloriaPlugin } from "veloria-ui/tailwind";
 
 export default {
   darkMode: ["class"],
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
-  plugins: [atlasPlugin],
+  plugins: [veloriaPlugin],
 };
 ```
 
@@ -60,13 +60,13 @@ export default {
 
 ```tsx
 // app/layout.tsx
-import { AtlasProvider } from "veloria-ui/provider";
+import { VeloriaProvider } from "veloria-ui/provider";
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <AtlasProvider>{children}</AtlasProvider>
+        <VeloriaProvider>{children}</VeloriaProvider>
       </body>
     </html>
   );
@@ -98,14 +98,14 @@ export default function Page() {
 veloria-ui ships with a CLI that copies components straight into your project — shadcn-style. You own the code.
 
 ```bash
-# Set up veloria-ui in your project (writes atlas.config.json)
+# Set up veloria-ui in your project (writes veloria.config.json)
 npx veloria-ui init
 
 # Add components
 npx veloria-ui add button
 npx veloria-ui add card modal drawer toast
 
-# Browse all 102 components
+# Browse all components
 npx veloria-ui list
 npx veloria-ui list --category forms
 
@@ -117,7 +117,7 @@ After running `add`, a file like `components/ui/button/index.tsx` appears in you
 
 ---
 
-## Components (90)
+## Components
 
 ### Basic (10)
 `Button` `IconButton` `Link` `Badge` `Avatar` `AvatarGroup` `Divider` `Tag` `Chip` `Tooltip`
@@ -221,13 +221,13 @@ veloria-ui/
 │   │   ├── overlay/         Modal, Drawer, CommandDialog, Lightbox…
 │   │   ├── media/           VideoPlayer, AudioPlayer, Carousel, Gallery…
 │   │   └── utility/         ThemeSwitcher, CopyButton, ResizablePanel…
-│   ├── hooks/               18 utility hooks
-│   ├── styles/              atlas.css — full design token system
+│   ├── hooks/               utility hooks
+│   ├── styles/              veloria.css — full design token system
 │   ├── types/               shared TypeScript types
 │   ├── utils/               cn() and helpers
 │   ├── cli/                 veloria-ui CLI (add, init, list, diff)
-│   ├── provider.tsx         AtlasProvider for Next.js
-│   └── tailwind.ts          atlasPlugin + atlasPreset
+│   ├── provider.tsx         VeloriaProvider for Next.js
+│   └── tailwind.ts          veloriaPlugin + veloriaPreset
 ├── package.json
 ├── tsup.config.ts
 └── tsconfig.json

@@ -1,9 +1,83 @@
 # Changelog
 
 All notable changes to Veloria UI are documented here.  
-Project by [JohnDev19](https://github.com/JohnDev19) · [GitHub](https://github.com/JohnDev19/Veloria-UI) · [veloria-ui.vercel.app](https://veloria-ui.vercel.app/)
+Project by [JohnDev19](https://github.com/JohnDev19) · [GitHub](https://github.com/JohnDev19/Veloria-UI) · [ui-veloria.vercel.app](https://ui-veloria.vercel.app/)
 
 This project follows [Semantic Versioning](https://semver.org).
+
+---
+
+## [0.1.3] — 2026-03-16 (Edited)
+
+### Branding & Naming
+
+- Renamed all `atlas-` CSS keyframe and class prefixes to `veloria-` throughout `veloria.css`
+- Renamed `atlas.css` to `veloria.css` — update your import to `import "veloria-ui/styles"`
+- Renamed `atlasPlugin` → `veloriaPlugin` and `atlasPreset` → `veloriaPreset` in `tailwind.ts`
+- Renamed `AtlasProvider` → `VeloriaProvider` and `AtlasProviderProps` → `VeloriaProviderProps` in `provider.tsx`
+- Renamed `AtlasTheme` type → `VeloriaTheme` in `hooks/index.ts`
+- Renamed `AtlasBaseProps` → `VeloriaBaseProps` and `AtlasAriaProps` → `VeloriaAriaProps` in `types/index.ts`
+- Renamed `atlas.config.json` → `veloria.config.json` — CLI `init` now writes `veloria.config.json`
+- Renamed localStorage theme key from `atlas-theme` to `veloria-theme`
+- Removed legacy `atlas` bin alias from `package.json`
+- Updated all homepage and docs URLs to `https://ui-veloria.vercel.app/`
+- Removed hardcoded component count from descriptions and CLI copy
+
+### Bug Fixes
+
+- Fixed `TypeError: Cannot read properties of null (reading 'matches')` — `window.matchMedia` now uses optional chaining (`?.`) in `useTheme` and an explicit null guard in `useMediaQuery`, preventing crashes in jsdom and certain SSR environments
+
+---
+
+## [0.1.2] — 2026-03-15 (UPDATED)
+
+### New Components (20)
+
+**Advanced Forms**
+- `PhoneInput` — international phone number with country dial-code selector
+- `TagInput` — type and press Enter to add inline tags, supports max, duplicates control
+- `CurrencyInput` — formatted number input with locale-aware currency symbol
+- `RatingInput` — star rating picker with hover state, clear button, and read-only mode
+
+**Data Display**
+- `StatsCard` — metric card with icon, trend indicator, and loading skeleton
+- `TreeView` — nested expandable tree with keyboard navigation and multi-depth support
+- `JsonViewer` — collapsible syntax-highlighted JSON tree with configurable max depth
+- `Heatmap` — GitHub-style activity grid with value intensity scale
+- `KanbanBoard` — drag-and-drop column board with card tagging and assignee slot
+
+**Feedback and Overlay**
+- `BannerAlert` — full-width top-of-page announcement strip with 4 variants
+- `ConfirmDialog` — opinionated confirmation modal with async confirm support and danger variant
+- `FloatingActionButton` — FAB with expandable speed-dial actions and 3 position presets
+- `RichTooltip` — tooltip with title, description, and action slot
+- `Tour` — multi-step onboarding overlay with dot progress indicator
+
+**Utility**
+- `InfiniteScroll` — IntersectionObserver-based load-more trigger with loader slot
+- `VirtualList` — windowed list renderer for large datasets with configurable overscan
+
+### New Hooks (6)
+
+- `useForm` — form state and validation with touched tracking, no extra dependencies
+- `usePagination` — pagination logic decoupled from UI, with from/to helpers
+- `useIntersection` — IntersectionObserver wrapper with optional `once` mode
+- `useWindowSize` — reactive window width and height, SSR-safe
+- `useStep` — multi-step wizard state with `isFirst`, `isLast`, and progress percentage
+- `useCountdown` — countdown timer with `start`, `pause`, and `reset` controls
+
+---
+
+## [0.1.1] — 2026-03-13 (UPDATED)
+
+### Build fixes
+
+- Fixed `tailwindcss/plugin` resolve error — marked as external in tsup, switched to `require()` at runtime
+- Fixed `"types"` export condition ordering in `package.json` — `types` now comes before `import`/`require`
+- Fixed `use-toast.ts` renamed to `use-toast.tsx` — file contained JSX but had `.ts` extension
+- Fixed `TS2320` / `TS2322` conflicts across all component interfaces — `HTMLAttributes` built-in props (`color`, `size`, `title`, `prefix`, `onChange`, `onDrop`, `onDragOver`) now properly `Omit`-ed before extending
+- Renamed package from `veloria-ui-kit` to `veloria-ui`
+- CLI `--version` flag now reads dynamically from `package.json` instead of being hardcoded
 
 ---
 
@@ -11,8 +85,7 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ### Initial Release
 
-First public release of Veloria UI. 102 components, a full CLI, 18 hooks, a Tailwind
-plugin, and a complete CSS token system with light + dark mode.
+First public release of Veloria UI. A full CLI, hooks, a Tailwind plugin, and a complete CSS token system with light + dark mode.
 
 ---
 
@@ -62,56 +135,59 @@ plugin, and a complete CSS token system with light + dark mode.
 - `Switch` — three sizes, label, description
 - `Slider` — range slider
 - `RangeSlider` — dual-thumb slider
-- `DatePicker` — native date input wrapper
-- `TimePicker` — native time input wrapper
+- `DatePicker` — calendar popover with keyboard navigation
+- `TimePicker` — hour/minute/second with AM/PM toggle
 
 **Advanced Forms (10)**
-- `FileUpload` — drag-and-drop zone with click-to-upload fallback
-- `OTPInput` — PIN/OTP with auto-advance and paste support
-- `ColorPicker` — swatches + hex input
-- `SearchInput` — search with loading state and clear button
-- `PasswordInput` — toggle show/hide
-- `Combobox` — searchable single-value select
-- `MultiSelect` — multi-value select with chips
-- `FormField` / `FormLabel` / `FormError` — composable form primitives
+- `FileUpload` — drag-and-drop with preview, size limit, MIME type filter
+- `OTPInput` — SMS-style one-time-password input
+- `ColorPicker` — HEX/RGB/HSL input with swatch palette
+- `SearchInput` — debounced search with clear button
+- `PasswordInput` — toggle visibility with strength meter
+- `Combobox` — searchable dropdown with keyboard navigation
+- `MultiSelect` — tag-style multi-value select
+- `FormField` — label + input + error wrapper
+- `FormLabel` — accessible label
+- `FormError` — error message slot
 
 **Data Display (10)**
-- `Card` — surface with header/content/footer slots · 5 variants
-- `Table` + sub-primitives — full HTML table system
-- `DataTable` — sortable data table with loading and empty states
-- `List` / `ListItem` — simple, bordered, and divided lists
-- `Statistic` — key metric with trend indicator
-- `Timeline` — vertical events with color-coded icons
-- `Calendar` — month picker with highlighted dates
-- `CodeBlock` — code display with copy button and line numbers
-- `Chart` — chart wrapper (bring your own chart library)
+- `Card` / `CardHeader` / `CardContent` / `CardFooter`
+- `Table` — sortable columns, sticky header
+- `DataTable` — full-featured table with pagination and row selection
+- `List` / `ListItem`
+- `Statistic` — large number with label and trend
+- `Timeline` — vertical event list
+- `Calendar` — month grid with event dots
+- `Chart` — wrapper around Recharts with theme tokens
+- `CodeBlock` — syntax-highlighted code with copy button
 
 **Feedback (10)**
-- `Alert` — info/success/warning/danger with optional dismiss
-- `Toast` — Radix Toast with all sub-primitives
-- `Snackbar` — positioned message with action
-- `Progress` — linear bar with color variants
-- `CircularProgress` — SVG ring with indeterminate mode
-- `Skeleton` — pulse placeholder for text, rect, circle
-- `LoadingSpinner` — accessible SVG spinner
+- `Alert` — inline alert with 5 variants and icon slot
+- `Toast` — Radix Toast with 5 variants · programmatic via `useToast`
+- `Snackbar` — bottom-anchored status message
+- `Progress` — linear with animated fill
+- `CircularProgress` — SVG ring with percentage label
+- `Skeleton` — text, rect, circle variants
+- `LoadingSpinner` — 4 sizes · 3 variants
 - `EmptyState` — icon + title + description + action slot
-- `StatusIndicator` — online/offline/busy/away dot with pulse
-- `Notification` — notification item with avatar, timestamp, unread dot
+- `StatusIndicator` — colored dot with pulse animation
+- `Notification` — card-style notification with timestamp
 
 **Overlay (10)**
-- `Modal` — preset dialog with size variants (sm → full)
-- `Dialog` — full Radix Dialog primitive suite
-- `Drawer` — slide-in from any edge (left/right/top/bottom)
-- `Sheet` — Drawer alias
-- `Popover` — floating panel
-- `HoverCard` — rich hover preview
-- `ContextMenu` — right-click menu
+- `Modal` — centered dialog with close button
+- `Dialog` — full Radix Dialog with all sub-primitives
+- `Drawer` — side-sheet with 4 sides
+- `Sheet` — lightweight Drawer alias
+- `Popover` — Radix Popover
+- `HoverCard` — hover-triggered card
+- `ContextMenu` — right-click menu via Radix
 - `CommandDialog` — ⌘K palette
-- `Lightbox` / `ImageViewer` — full-screen image overlay
+- `Lightbox` — full-screen image viewer with zoom
+- `ImageViewer` — in-place image pan and zoom
 
 **Media (5)**
-- `Image` — fallback, aspect ratio, object-fit, rounded, caption
-- `VideoPlayer` — HTML5 video with captions/subtitles track support
+- `Image` — next/image wrapper with blur placeholder and fallback
+- `VideoPlayer` — custom controls, poster, autoplay, loop, track support
 - `AudioPlayer` — custom UI with seek bar, cover art
 - `Carousel` — autoplay, dots, arrows, loop, slidesPerView
 - `Gallery` — responsive image grid with click handler
@@ -137,70 +213,16 @@ plugin, and a complete CSS token system with light + dark mode.
 - `useToast` — programmatic toast notifications
 
 #### Infrastructure
-- Tailwind CSS plugin + preset (`atlasPlugin`, `atlasPreset`)
+- Tailwind CSS plugin + preset (`veloriaPlugin`, `veloriaPreset`)
 - Full CSS design token system — light and dark themes
-- `AtlasProvider` for Next.js App Router
+- `VeloriaProvider` for Next.js App Router
 - TypeScript strict throughout — full named type exports
 - Tree-shakeable ESM + CJS dual build via tsup
 - Turbo monorepo setup
 
 #### veloria-ui CLI
-- `init` — project setup wizard (detects Next.js, writes atlas.config.json)
+- `init` — project setup wizard (detects Next.js, writes veloria.config.json)
 - `add` — copies components + installs npm deps, resolves Veloria UI peer deps
-- `list` — browse all 102 components filtered by category
+- `list` — browse all components filtered by category
 - `diff` — compare local copy to latest (registry fetch, coming soon)
 - Auto-detects npm / pnpm / yarn / bun
-
----
-
----
-
-## [0.1.1] — 2026-03-13 (UPDATED)
-
-### Build fixes
-
-- Fixed `tailwindcss/plugin` resolve error — marked as external in tsup, switched to `require()` at runtime
-- Fixed `"types"` export condition ordering in `package.json` — `types` now comes before `import`/`require`
-- Fixed `use-toast.ts` renamed to `use-toast.tsx` — file contained JSX but had `.ts` extension
-- Fixed `TS2320` / `TS2322` conflicts across all component interfaces — `HTMLAttributes` built-in props (`color`, `size`, `title`, `prefix`, `onChange`, `onDrop`, `onDragOver`) now properly `Omit`-ed before extending
-- Renamed package from `veloria-ui-kit` to `veloria-ui`
-- CLI `--version` flag now reads dynamically from `package.json` instead of being hardcoded
-
----
-
-## [0.1.2] — 2026-03-15 (UPDATED)
-
-### New Components (20)
-
-**Advanced Forms**
-- `PhoneInput` — international phone number with country dial-code selector
-- `TagInput` — type and press Enter to add inline tags, supports max, duplicates control
-- `CurrencyInput` — formatted number input with locale-aware currency symbol
-- `RatingInput` — star rating picker with hover state, clear button, and read-only mode
-
-**Data Display**
-- `StatsCard` — metric card with icon, trend indicator, and loading skeleton
-- `TreeView` — nested expandable tree with keyboard navigation and multi-depth support
-- `JsonViewer` — collapsible syntax-highlighted JSON tree with configurable max depth
-- `Heatmap` — GitHub-style activity grid with value intensity scale
-- `KanbanBoard` — drag-and-drop column board with card tagging and assignee slot
-
-**Feedback and Overlay**
-- `BannerAlert` — full-width top-of-page announcement strip with 4 variants
-- `ConfirmDialog` — opinionated confirmation modal with async confirm support and danger variant
-- `FloatingActionButton` — FAB with expandable speed-dial actions and 3 position presets
-- `RichTooltip` — tooltip with title, description, and action slot
-- `Tour` — multi-step onboarding overlay with dot progress indicator
-
-**Utility**
-- `InfiniteScroll` — IntersectionObserver-based load-more trigger with loader slot
-- `VirtualList` — windowed list renderer for large datasets with configurable overscan
-
-### New Hooks (6)
-
-- `useForm` — form state and validation with touched tracking, no extra dependencies
-- `usePagination` — pagination logic decoupled from UI, with from/to helpers
-- `useIntersection` — IntersectionObserver wrapper with optional `once` mode
-- `useWindowSize` — reactive window width and height, SSR-safe
-- `useStep` — multi-step wizard state with `isFirst`, `isLast`, and progress percentage
-- `useCountdown` — countdown timer with `start`, `pause`, and `reset` controls

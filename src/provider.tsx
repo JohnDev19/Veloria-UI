@@ -1,18 +1,18 @@
 /**
- * VeloriaProvider — wrap your app with this once.
+ * AtlasProvider — wrap your app with this once.
  *
  * Covers Toast (needed for useToast) and TooltipProvider (so you don't
  * have to wrap every single Tooltip yourself).
  *
  * Usage in app/layout.tsx:
  *
- *   import { VeloriaProvider } from "veloria-ui/provider";
+ *   import { AtlasProvider } from "veloria-ui/provider";
  *
  *   export default function RootLayout({ children }) {
  *     return (
  *       <html lang="en">
  *         <body>
- *           <VeloriaProvider>{children}</VeloriaProvider>
+ *           <AtlasProvider>{children}</AtlasProvider>
  *         </body>
  *       </html>
  *     );
@@ -27,7 +27,7 @@ import * as React from "react";
 import { ToastProvider, ToastViewport } from "./components/feedback";
 import { TooltipProvider } from "./components/basic";
 
-export interface VeloriaProviderProps {
+export interface AtlasProviderProps {
   children: React.ReactNode;
   /** How long toasts stay on screen in ms. Default: 5000 */
   toastDuration?: number;
@@ -37,12 +37,12 @@ export interface VeloriaProviderProps {
   tooltipDelay?: number;
 }
 
-export function VeloriaProvider({
+export function AtlasProvider({
   children,
   toastDuration = 5000,
   toastSwipeDirection = "right",
   tooltipDelay = 300,
-}: VeloriaProviderProps) {
+}: AtlasProviderProps) {
   return (
     <ToastProvider duration={toastDuration} swipeDirection={toastSwipeDirection}>
       <TooltipProvider delayDuration={tooltipDelay}>

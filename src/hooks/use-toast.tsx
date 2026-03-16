@@ -1,7 +1,7 @@
 /**
  * useToast — fire toasts from anywhere without prop drilling.
  *
- * Pair this with <VeloriaProvider> at the root of your app.
+ * Pair this with <AtlasProvider> at the root of your app.
  * The context lives there and this hook just taps into it.
  *
  * @example
@@ -9,7 +9,7 @@
  *   toast({ title: "Saved!", variant: "success" });
  *   toast({ title: "Uh oh", description: "Something broke.", variant: "danger" });
  *
- * — Veloria UI, https://ui-veloria.vercel.app/
+ * — Veloria UI, https://veloria-ui.vercel.app/
  */
 
 "use client";
@@ -66,8 +66,8 @@ export function useToast(): ToastContextValue {
   const ctx = React.useContext(ToastContext);
   if (!ctx) {
     throw new Error(
-      "useToast must be called inside <VeloriaProvider>. " +
-      "Make sure you've wrapped your app root — see https://ui-veloria.vercel.app/docs/provider"
+      "useToast must be called inside <AtlasProvider>. " +
+      "Make sure you've wrapped your app root — see https://veloria-ui.vercel.app/docs/provider"
     );
   }
   return ctx;

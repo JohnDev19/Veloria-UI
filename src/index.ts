@@ -2,41 +2,16 @@
  * veloria-ui
  *
  * Build anything. Ship faster.
- * Accessible, composable React components — dark-mode ready.
+ * 102 production-ready components — accessible, composable, dark-mode ready.
  *
  * By JohnDev19 — https://github.com/JohnDev19/Veloria-UI
- * Docs: https://ui-veloria.vercel.app/
+ * Docs: https://veloria-ui.vercel.app/
  * Issues: https://github.com/JohnDev19/Veloria-UI/issues
  *
  * @license MIT
  */
 
-// ─── Types ────────────────────────────────────────────────────────────────
-export type {
-  Size,
-  ResponsiveSize,
-  ColorScheme,
-  Variant,
-  Placement,
-  Side,
-  VeloriaBaseProps,
-  VeloriaAriaProps,
-  AsChildProps,
-  Orientation,
-  Status,
-  Theme,
-  VariantProps,
-} from "./types";
-
-// ─── Utils ────────────────────────────────────────────────────────────────
-export { cn, composeEventHandlers, generateId, isBrowser, isDefined, noop } from "./utils/cn";
-
-// ─── Tailwind plugin ──────────────────────────────────────────────────────
-export { veloriaPlugin, veloriaPreset } from "./tailwind";
-
 // ─── Basic ────────────────────────────────────────────────────────────────
-// Button & IconButton live in dedicated files — import directly to avoid
-// the barrel re-exporting them before they're resolved
 export { Button, buttonVariants } from "./components/basic/Button";
 export type { ButtonProps } from "./components/basic/Button";
 export { IconButton, iconButtonVariants } from "./components/basic/IconButton";
@@ -168,10 +143,6 @@ export {
   FormField,
   FormLabel,
   FormError,
-  PhoneInput,
-  TagInput,
-  CurrencyInput,
-  RatingInput,
 } from "./components/advanced-forms";
 export type {
   FileUploadProps,
@@ -185,10 +156,6 @@ export type {
   FormFieldProps,
   FormLabelProps,
   FormErrorProps,
-  PhoneInputProps,
-  TagInputProps,
-  CurrencyInputProps,
-  RatingInputProps,
 } from "./components/advanced-forms";
 
 // ─── Data Display ─────────────────────────────────────────────────────────
@@ -214,11 +181,6 @@ export {
   Calendar,
   CodeBlock,
   Chart,
-  StatsCard,
-  TreeView,
-  JsonViewer,
-  Heatmap,
-  KanbanBoard,
 } from "./components/data-display";
 export type {
   CardProps,
@@ -232,16 +194,6 @@ export type {
   CalendarProps,
   CodeBlockProps,
   ChartProps,
-  StatsCardProps,
-  TreeNode,
-  TreeViewProps,
-  JsonViewerProps,
-  JsonValue,
-  HeatmapCell,
-  HeatmapProps,
-  KanbanCard,
-  KanbanColumn,
-  KanbanBoardProps,
 } from "./components/data-display";
 
 // ─── Feedback ─────────────────────────────────────────────────────────────
@@ -264,11 +216,6 @@ export {
   EmptyState,
   StatusIndicator,
   Notification,
-  BannerAlert,
-  ConfirmDialog,
-  FloatingActionButton,
-  RichTooltip,
-  Tour,
 } from "./components/feedback";
 export type {
   AlertProps,
@@ -280,13 +227,6 @@ export type {
   EmptyStateProps,
   StatusIndicatorProps,
   NotificationProps,
-  BannerAlertProps,
-  ConfirmDialogProps,
-  FABAction,
-  FloatingActionButtonProps,
-  RichTooltipProps,
-  TourStep,
-  TourProps,
 } from "./components/feedback";
 
 // ─── Overlay ──────────────────────────────────────────────────────────────
@@ -357,8 +297,6 @@ export {
   KeyboardShortcut,
   ResizablePanel,
   DragDropArea,
-  InfiniteScroll,
-  VirtualList,
 } from "./components/utility";
 export type {
   ThemeSwitcherProps,
@@ -366,8 +304,6 @@ export type {
   KeyboardShortcutProps,
   ResizablePanelProps,
   DragDropAreaProps,
-  InfiniteScrollProps,
-  VirtualListProps,
 } from "./components/utility";
 
 // ─── Hooks ────────────────────────────────────────────────────────────────
@@ -383,6 +319,67 @@ export {
   useKeydown,
   useMounted,
   useId,
+} from "./hooks";
+export type { UseDisclosureOptions, UseClipboardOptions, AtlasTheme } from "./hooks";
+
+export {
+  useToast,
+  ToastContextProvider,
+} from "./hooks/use-toast";
+export type { ToastVariant, ToastData, ToastInput } from "./hooks/use-toast";
+
+// ─── Types ────────────────────────────────────────────────────────────────
+export type {
+  Size,
+  ResponsiveSize,
+  ColorScheme,
+  Variant,
+  Placement,
+  Side,
+  AtlasBaseProps,
+  AtlasAriaProps,
+  AsChildProps,
+  Orientation,
+  Status,
+  Theme,
+  VariantProps,
+} from "./types";
+
+// ─── Utils ────────────────────────────────────────────────────────────────
+export { cn, composeEventHandlers, generateId, isBrowser, isDefined, noop } from "./utils/cn";
+
+// ─── Tailwind plugin ──────────────────────────────────────────────────────
+export { atlasPlugin, atlasPreset } from "./tailwind";
+
+// ─── v0.1.2 — New Components ─────────────────────────────────────────────
+
+// Advanced Forms
+export { PhoneInput, TagInput, CurrencyInput, RatingInput } from "./components/advanced-forms";
+export type { PhoneInputProps, TagInputProps, CurrencyInputProps, RatingInputProps } from "./components/advanced-forms";
+
+// Data Display
+export { StatsCard, TreeView, JsonViewer, Heatmap, KanbanBoard } from "./components/data-display";
+export type {
+  StatsCardProps, TreeNode, TreeViewProps,
+  JsonViewerProps, JsonValue,
+  HeatmapCell, HeatmapProps,
+  KanbanCard, KanbanColumn, KanbanBoardProps,
+} from "./components/data-display";
+
+// Feedback & Overlay
+export { BannerAlert, ConfirmDialog, FloatingActionButton, RichTooltip, Tour } from "./components/feedback";
+export type {
+  BannerAlertProps, ConfirmDialogProps,
+  FABAction, FloatingActionButtonProps,
+  RichTooltipProps, TourStep, TourProps,
+} from "./components/feedback";
+
+// Utility
+export { InfiniteScroll, VirtualList } from "./components/utility";
+export type { InfiniteScrollProps, VirtualListProps } from "./components/utility";
+
+// ─── v0.1.2 — New Hooks ──────────────────────────────────────────────────
+export {
   useForm,
   usePagination,
   useIntersection,
@@ -391,23 +388,9 @@ export {
   useCountdown,
 } from "./hooks";
 export type {
-  UseDisclosureOptions,
-  UseClipboardOptions,
-  VeloriaTheme,
-  UseFormOptions,
-  UseFormReturn,
-  UsePaginationOptions,
-  UsePaginationReturn,
-  UseIntersectionOptions,
-  WindowSize,
-  UseStepOptions,
-  UseStepReturn,
-  UseCountdownOptions,
-  UseCountdownReturn,
+  UseFormOptions, UseFormReturn,
+  UsePaginationOptions, UsePaginationReturn,
+  UseIntersectionOptions, WindowSize,
+  UseStepOptions, UseStepReturn,
+  UseCountdownOptions, UseCountdownReturn,
 } from "./hooks";
-
-export {
-  useToast,
-  ToastContextProvider,
-} from "./hooks/use-toast";
-export type { ToastVariant, ToastData, ToastInput } from "./hooks/use-toast";

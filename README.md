@@ -1,69 +1,91 @@
-# Veloria UI
+<div align="center">
 
-**Build anything. Ship faster.**
+<br/>
 
-Accessible, composable React components with Tailwind CSS and dark mode.
+```
+╦  ╦╔═╗╦  ╔═╗╦═╗╦╔═╗
+╚╗╔╝║╣ ║  ║ ║╠╦╝║╠═╣
+ ╚╝ ╚═╝╩═╝╚═╝╩╚═╩╩ ╩
+```
 
-by [JohnDev19](https://github.com/JohnDev19) · [ui-veloria.vercel.app](https://ui-veloria.vercel.app/) · [GitHub](https://github.com/JohnDev19/Veloria-UI)
+### **Build anything. Ship faster.**
+
+102 production-ready React components — accessible, composable, dark-mode ready.
+Works with Tailwind CSS and Next.js out of the box.
+
+[![npm](https://img.shields.io/npm/v/veloria-ui?color=0ea5e9&label=veloria-ui)](https://www.npmjs.com/package/veloria-ui)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178c6)](https://www.typescriptlang.org)
+[![GitHub](https://img.shields.io/github/stars/JohnDev19/Veloria-UI?style=social)](https://github.com/JohnDev19/Veloria-UI)
+
+**[Docs](https://veloria-ui.vercel.app/)** · **[Components](https://veloria-ui.vercel.app/components)** · **[Issues](https://github.com/JohnDev19/Veloria-UI/issues)** · **[Changelog](CHANGELOG.md)**
+
+</div>
 
 ---
 
-## Installation
+## Install
 
 ```bash
 npm install veloria-ui
+# pnpm add veloria-ui
+# bun add veloria-ui
 ```
 
 ---
 
-## Quick Start
+## Setup
 
-### 1. Import styles
+### 1. Import the stylesheet
 
-```css
-/* app/globals.css or src/index.css */
-@import "veloria-ui/styles";
+```tsx
+// app/layout.tsx
+import "veloria-ui/styles";
 ```
 
-### 2. Configure Tailwind
+### 2. Add the Tailwind plugin
 
 ```ts
 // tailwind.config.ts
-import { veloriaPreset } from "veloria-ui/tailwind";
+import { atlasPlugin } from "veloria-ui/tailwind";
 
 export default {
-  presets: [veloriaPreset],
-  content: ["./src/**/*.{ts,tsx}"],
+  darkMode: ["class"],
+  content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
+  plugins: [atlasPlugin],
 };
 ```
 
 ### 3. Wrap your app
 
 ```tsx
-// app/layout.tsx (Next.js App Router)
-import { VeloriaProvider } from "veloria-ui/provider";
+// app/layout.tsx
+import { AtlasProvider } from "veloria-ui/provider";
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <VeloriaProvider>{children}</VeloriaProvider>
+        <AtlasProvider>{children}</AtlasProvider>
       </body>
     </html>
   );
 }
 ```
 
-### 4. Use components
+### 4. Start building
 
 ```tsx
-import { Button, Card, Badge } from "veloria-ui";
+import { Button, Card, CardContent, Input, Badge } from "veloria-ui";
 
 export default function Page() {
   return (
     <Card>
-      <Badge variant="success">New</Badge>
-      <Button variant="solid">Get Started</Button>
+      <CardContent className="flex flex-col gap-4 p-6">
+        <Badge variant="soft" color="success">New</Badge>
+        <Input placeholder="Email address" type="email" />
+        <Button variant="solid" size="lg">Get started</Button>
+      </CardContent>
     </Card>
   );
 }
@@ -73,20 +95,85 @@ export default function Page() {
 
 ## CLI
 
-Copy components directly into your project (shadcn/ui-style):
+veloria-ui ships with a CLI that copies components straight into your project — shadcn-style. You own the code.
 
 ```bash
+# Set up veloria-ui in your project (writes atlas.config.json)
 npx veloria-ui init
-npx veloria-ui add button card modal
+
+# Add components
+npx veloria-ui add button
+npx veloria-ui add card modal drawer toast
+
+# Browse all 102 components
 npx veloria-ui list
 npx veloria-ui list --category forms
+
+# Compare your local copy to the latest version
+npx veloria-ui diff button
+```
+
+After running `add`, a file like `components/ui/button/index.tsx` appears in your project. It re-exports from `veloria-ui` by default, or you can paste the full source in and go wild.
+
+---
+
+## Components (90)
+
+### Basic (10)
+`Button` `IconButton` `Link` `Badge` `Avatar` `AvatarGroup` `Divider` `Tag` `Chip` `Tooltip`
+
+### Layout (10)
+`Container` `Stack` `Grid` `Flex` `Section` `Spacer` `AspectRatio` `Center` `ScrollArea` `Masonry`
+
+### Navigation (10)
+`Navbar` `Sidebar` `Menu` `DropdownMenu` `Breadcrumb` `Pagination` `Tabs` `CommandPalette` `NavigationMenu` `Stepper`
+
+### Forms (10)
+`Input` `TextArea` `Select` `Checkbox` `RadioGroup` `Switch` `Slider` `RangeSlider` `DatePicker` `TimePicker`
+
+### Advanced Forms (10)
+`FileUpload` `OTPInput` `ColorPicker` `SearchInput` `PasswordInput` `Combobox` `MultiSelect` `FormField` `FormLabel` `FormError`
+
+### Data Display (10)
+`Card` `Table` `DataTable` `List` `ListItem` `Statistic` `Timeline` `Calendar` `Chart` `CodeBlock`
+
+### Feedback (10)
+`Alert` `Toast` `Snackbar` `Progress` `CircularProgress` `Skeleton` `LoadingSpinner` `EmptyState` `StatusIndicator` `Notification`
+
+### Overlay (10)
+`Modal` `Dialog` `Drawer` `Popover` `HoverCard` `ContextMenu` `CommandDialog` `Sheet` `Lightbox` `ImageViewer`
+
+### Media (5)
+`Image` `VideoPlayer` `AudioPlayer` `Carousel` `Gallery`
+
+### Utility (5)
+`ThemeSwitcher` `CopyButton` `KeyboardShortcut` `ResizablePanel` `DragDropArea`
+
+---
+
+## Hooks
+
+```tsx
+import {
+  useDisclosure,     // open/close state for modals, drawers, anything toggle
+  useMediaQuery,     // subscribe to any CSS media query
+  useBreakpoint,     // Tailwind breakpoint detection (sm, md, lg, xl, 2xl)
+  useClipboard,      // clipboard copy with "copied!" feedback
+  useLocalStorage,   // useState that persists to localStorage
+  useTheme,          // read/set light · dark · system theme
+  useDebounce,       // debounce any value — perfect for search inputs
+  useOnClickOutside, // detect clicks outside a ref'd element
+  useKeydown,        // keyboard shortcut listener with modifier support
+  useMounted,        // SSR-safe mount check
+  useToast,          // fire toasts programmatically
+} from "veloria-ui";
 ```
 
 ---
 
-## Design Tokens
+## Theming
 
-Override them in your global CSS:
+All colors are CSS custom properties. Override them in your global CSS:
 
 ```css
 :root {
@@ -134,13 +221,13 @@ veloria-ui/
 │   │   ├── overlay/         Modal, Drawer, CommandDialog, Lightbox…
 │   │   ├── media/           VideoPlayer, AudioPlayer, Carousel, Gallery…
 │   │   └── utility/         ThemeSwitcher, CopyButton, ResizablePanel…
-│   ├── hooks/               utility hooks
-│   ├── styles/              veloria.css — full design token system
+│   ├── hooks/               18 utility hooks
+│   ├── styles/              atlas.css — full design token system
 │   ├── types/               shared TypeScript types
 │   ├── utils/               cn() and helpers
 │   ├── cli/                 veloria-ui CLI (add, init, list, diff)
-│   ├── provider.tsx         VeloriaProvider for Next.js
-│   └── tailwind.ts          veloriaPlugin + veloriaPreset
+│   ├── provider.tsx         AtlasProvider for Next.js
+│   └── tailwind.ts          atlasPlugin + atlasPreset
 ├── package.json
 ├── tsup.config.ts
 └── tsconfig.json

@@ -1,37 +1,42 @@
-/**
- * veloria-ui
- *
- * Build anything. Ship faster.
- * 102 production-ready components — accessible, composable, dark-mode ready.
- *
- * By JohnDev19 — https://github.com/JohnDev19/Veloria-UI
- * Docs: https://veloria-ui.vercel.app/
- * Issues: https://github.com/JohnDev19/Veloria-UI/issues
- *
- * @license MIT
- */
+// ─── Types ────────────────────────────────────────────────────────────────
+export type {
+  Size,
+  ResponsiveSize,
+  ColorScheme,
+  Variant,
+  Placement,
+  Side,
+  VeloriaBaseProps,
+  VeloriaAriaProps,
+  AsChildProps,
+  Orientation,
+  Status,
+  Theme,
+  VariantProps,
+} from "./types";
+
+// ─── Utils ────────────────────────────────────────────────────────────────
+export { cn, composeEventHandlers, generateId, isBrowser, isDefined, noop } from "./utils/cn";
+
+// ─── Tailwind plugin ──────────────────────────────────────────────────────
+export { veloriaPlugin, veloriaPreset } from "./tailwind";
 
 // ─── Basic ────────────────────────────────────────────────────────────────
-export { Button, buttonVariants } from "./components/basic/Button";
-export type { ButtonProps } from "./components/basic/Button";
-export { IconButton, iconButtonVariants } from "./components/basic/IconButton";
-export type { IconButtonProps } from "./components/basic/IconButton";
 export {
+  Button,
+  IconButton,
   Link,
-  Badge, badgeVariants,
+  Badge,
   Avatar,
   AvatarGroup,
   Divider,
   Tag,
   Chip,
   Tooltip,
-  TooltipProvider,
-  TooltipRoot,
-  TooltipTrigger,
-  TooltipContent,
 } from "./components/basic";
 export type {
-  LinkProps,
+  ButtonProps,
+  IconButtonProps,
   BadgeProps,
   AvatarProps,
   AvatarGroupProps,
@@ -39,6 +44,7 @@ export type {
   TagProps,
   ChipProps,
   TooltipProps,
+  TooltipProvider,
 } from "./components/basic";
 
 // ─── Layout ───────────────────────────────────────────────────────────────
@@ -78,7 +84,6 @@ export {
   DropdownMenuSeparator,
   DropdownMenuLabel,
   DropdownMenuGroup,
-  DropdownMenuPortal,
   DropdownMenuSub,
   DropdownMenuRadioGroup,
   Breadcrumb,
@@ -88,75 +93,60 @@ export {
   TabsTrigger,
   TabsContent,
   Stepper,
+  CommandDialog,
+  CommandItem,
+  CommandGroup,
+  CommandSeparator,
 } from "./components/navigation";
 export type {
   NavbarProps,
   SidebarProps,
+  MenuProps,
   MenuItemProps,
-  BreadcrumbItem,
   BreadcrumbProps,
   PaginationProps,
-  StepperStep,
+  TabsProps,
   StepperProps,
 } from "./components/navigation";
 
 // ─── Forms ────────────────────────────────────────────────────────────────
 export {
-  Input, inputVariants,
+  Input,
   TextArea,
   Select,
-  SelectGroup,
-  SelectValue,
   SelectTrigger,
   SelectContent,
   SelectItem,
-  SelectLabel,
-  SelectSeparator,
+  SelectValue,
   Checkbox,
   RadioGroup,
+  RadioGroupItem,
   Switch,
   Slider,
   RangeSlider,
   DatePicker,
   TimePicker,
+  FileUpload,
+  OTPInput,
+  ColorPicker,
+  Combobox,
+  MultiSelect,
 } from "./components/forms";
 export type {
   InputProps,
   TextAreaProps,
   CheckboxProps,
-  RadioGroupProps,
-  RadioOption,
   SwitchProps,
+  SliderProps,
+  RangeSliderProps,
   DatePickerProps,
   TimePickerProps,
-} from "./components/forms";
-
-// ─── Advanced Forms ───────────────────────────────────────────────────────
-export {
-  FileUpload,
-  OTPInput,
-  ColorPicker,
-  SearchInput,
-  PasswordInput,
-  Combobox,
-  MultiSelect,
-  FormField,
-  FormLabel,
-  FormError,
-} from "./components/advanced-forms";
-export type {
   FileUploadProps,
   OTPInputProps,
   ColorPickerProps,
-  SearchInputProps,
-  PasswordInputProps,
-  ComboboxOption,
   ComboboxProps,
   MultiSelectProps,
-  FormFieldProps,
-  FormLabelProps,
-  FormErrorProps,
-} from "./components/advanced-forms";
+} from "./components/forms";
 
 // ─── Data Display ─────────────────────────────────────────────────────────
 export {
@@ -166,34 +156,33 @@ export {
   CardDescription,
   CardContent,
   CardFooter,
+  DataTable,
+  List,
+  ListItem,
+  Statistic,
+  Timeline,
+  TimelineItem,
+  Calendar,
+  CodeBlock,
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
   Table,
   TableHeader,
   TableBody,
   TableRow,
   TableHead,
   TableCell,
-  TableCaption,
-  DataTable,
-  List,
-  ListItem,
-  Statistic,
-  Timeline,
-  Calendar,
-  CodeBlock,
-  Chart,
 } from "./components/data-display";
 export type {
   CardProps,
-  DataTableColumn,
   DataTableProps,
   ListProps,
-  ListItemProps,
   StatisticProps,
   TimelineEvent,
-  TimelineProps,
   CalendarProps,
   CodeBlockProps,
-  ChartProps,
 } from "./components/data-display";
 
 // ─── Feedback ─────────────────────────────────────────────────────────────
@@ -201,17 +190,16 @@ export {
   Alert,
   AlertTitle,
   AlertDescription,
+  Toast,
   ToastProvider,
   ToastViewport,
-  Toast,
   ToastTitle,
   ToastDescription,
   ToastClose,
   ToastAction,
-  Snackbar,
-  Progress,
-  CircularProgress,
   Skeleton,
+  Progress,
+  Spinner,
   LoadingSpinner,
   EmptyState,
   StatusIndicator,
@@ -219,11 +207,9 @@ export {
 } from "./components/feedback";
 export type {
   AlertProps,
-  SnackbarProps,
-  ProgressProps,
-  CircularProgressProps,
   SkeletonProps,
-  LoadingSpinnerProps,
+  ProgressProps,
+  SpinnerProps,
   EmptyStateProps,
   StatusIndicatorProps,
   NotificationProps,
@@ -259,10 +245,6 @@ export {
   ContextMenuGroup,
   ContextMenuSub,
   ContextMenuRadioGroup,
-  CommandDialog,
-  CommandItem,
-  CommandGroup,
-  CommandSeparator,
   Lightbox,
   ImageViewer,
 } from "./components/overlay";
@@ -320,36 +302,13 @@ export {
   useMounted,
   useId,
 } from "./hooks";
-export type { UseDisclosureOptions, UseClipboardOptions, AtlasTheme } from "./hooks";
+export type { UseDisclosureOptions, UseClipboardOptions, VeloriaTheme } from "./hooks";
 
 export {
   useToast,
   ToastContextProvider,
 } from "./hooks/use-toast";
 export type { ToastVariant, ToastData, ToastInput } from "./hooks/use-toast";
-
-// ─── Types ────────────────────────────────────────────────────────────────
-export type {
-  Size,
-  ResponsiveSize,
-  ColorScheme,
-  Variant,
-  Placement,
-  Side,
-  AtlasBaseProps,
-  AtlasAriaProps,
-  AsChildProps,
-  Orientation,
-  Status,
-  Theme,
-  VariantProps,
-} from "./types";
-
-// ─── Utils ────────────────────────────────────────────────────────────────
-export { cn, composeEventHandlers, generateId, isBrowser, isDefined, noop } from "./utils/cn";
-
-// ─── Tailwind plugin ──────────────────────────────────────────────────────
-export { atlasPlugin, atlasPreset } from "./tailwind";
 
 // ─── v0.1.2 — New Components ─────────────────────────────────────────────
 

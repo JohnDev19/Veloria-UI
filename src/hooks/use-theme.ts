@@ -3,7 +3,7 @@ import * as React from "react";
 
 export function useTheme() {
   const [theme, setThemeStorage] = useLocalStorage<"light" | "dark" | "system">(
-    "veloria-ui-theme",
+    "veloria-theme",
     "system"
   );
 
@@ -18,6 +18,7 @@ export function useTheme() {
 
       let resolved: "light" | "dark";
       if (t === "system") {
+        // Guard window.matchMedia — it can be null in jsdom / SSR envs
         resolved =
           typeof window !== "undefined" &&
           typeof window.matchMedia === "function" &&

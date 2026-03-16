@@ -7,12 +7,12 @@
  * Works exactly like shadcn/ui's CLI — pick what you want, paste it in.
  *
  * By JohnDev19 — https://github.com/JohnDev19/Veloria-UI
- * Docs: https://veloria-ui.vercel.app/
+ * Docs: https://ui-veloria.vercel.app/
  *
  * Commands:
  *   veloria-ui init                    — project setup wizard
  *   veloria-ui add button card modal   — copy components into your project
- *   veloria-ui list                    — browse all 102 components
+ *   veloria-ui list                    — browse all available components
  *   veloria-ui list --category forms   — filter by category
  *   veloria-ui diff button             — compare local vs latest
  */
@@ -75,43 +75,41 @@ program
     const answers = opts.yes
       ? { componentsDir: "components/ui", cssPath: isNext ? "app/globals.css" : "src/index.css", pm: detectPM(cwd) }
       : await prompts([
-          { type: "text",   name: "componentsDir", message: "Where should components go?",      initial: "components/ui" },
-          { type: "text",   name: "cssPath",        message: "Path to your global CSS file?",    initial: isNext ? "app/globals.css" : "src/index.css" },
-          { type: "select", name: "pm",             message: "Package manager?",
-            choices: [{ title: "npm", value: "npm" }, { title: "pnpm", value: "pnpm" },
-                      { title: "yarn", value: "yarn" }, { title: "bun", value: "bun" }] },
+          { type: "text",   name: "componentsDir", message: "Where should components go?", initial: "components/ui" },
+          { type: "text",   name: "cssPath",        message: "Path to your global CSS file?", initial: isNext ? "app/globals.css" : "src/index.css" },
+          { type: "select", name: "pm",             message: "Package manager?", choices: [
+              { title: "npm", value: "npm" }, { title: "pnpm", value: "pnpm" },
+              { title: "yarn", value: "yarn" }, { title: "bun", value: "bun" },
+            ], initial: ["npm","pnpm","yarn","bun"].indexOf(detectPM(cwd)) },
         ]);
 
-    if (!answers.componentsDir) return;
-
-    // Write atlas.config.json
-    fs.writeJsonSync(path.join(cwd, "atlas.config.json"), {
-      $schema: "https://veloria-ui.vercel.app/schema.json",
-      style: "default",
-      typescript: opts.typescript ?? true,
-      tailwind: { config: "tailwind.config.ts", css: answers.cssPath, baseColor: "slate", cssVariables: true },
-      aliases: { components: `@/${answers.componentsDir}`, utils: "@/lib/utils" },
+    // Write veloria.config.json
+    const configPath = path.join(cwd, "veloria.config.json");
+    fs.writeJsonSync(configPath, {
+      aliases: { components: `@/${answers.componentsDir}` },
+      css: answers.cssPath,
+      typescript: opts.typescript,
     }, { spaces: 2 });
-    console.log(chalk.green("  ✓ Created atlas.config.json"));
+    console.log(chalk.green("  ✔") + chalk.dim("  veloria.config.json written"));
 
-    // Write lib/utils.ts if missing
-    const utilsPath = path.join(cwd, "lib", "utils.ts");
-    if (!fs.existsSync(utilsPath)) {
-      await fs.ensureDir(path.dirname(utilsPath));
-      await fs.writeFile(utilsPath,
-        `import { type ClassValue, clsx } from "clsx";\nimport { twMerge } from "tailwind-merge";\n\nexport function cn(...inputs: ClassValue[]) {\n  return twMerge(clsx(inputs));\n}\n`
-      );
-      console.log(chalk.green("  ✓ Created lib/utils.ts"));
+    // Inject CSS import
+    const cssPath = path.join(cwd, answers.cssPath);
+    if (fs.existsSync(cssPath)) {
+      const css = fs.readFileSync(cssPath, "utf8");
+      if (!css.includes("veloria-ui/styles")) {
+        fs.writeFileSync(cssPath, `@import "veloria-ui/styles";\n\n${css}`);
+        console.log(chalk.green("  ✔") + chalk.dim(`  CSS import added to ${answers.cssPath}`));
+      }
     }
 
     // Install core deps
     if (opts.install !== false) {
-      const pm = answers.pm as string;
-      const spinner = ora(`Installing core deps with ${pm}…`).start();
+      const pm = answers.pm ?? detectPM(cwd);
+      const deps = ["clsx", "tailwind-merge", "class-variance-authority", "@radix-ui/react-slot"];
+      const spinner = ora("  Installing core dependencies…").start();
       try {
-        const deps = ["clsx", "tailwind-merge", "class-variance-authority", "@radix-ui/react-slot"];
-        const cmd = pm === "pnpm" ? ["pnpm", "add", ...deps]
-                  : pm === "bun"  ? ["bun",  "add", ...deps]
+        const cmd = pm === "bun"  ? ["bun",  "add", ...deps]
+                  : pm === "pnpm" ? ["pnpm", "add", ...deps]
                   : pm === "yarn" ? ["yarn", "add", ...deps]
                                   : ["npm",  "install", ...deps];
         await execa(cmd[0], cmd.slice(1), { cwd });
@@ -128,7 +126,7 @@ ${chalk.bold.green("  Veloria UI is ready!")}
   ${chalk.dim("Next steps:")}
   ${chalk.cyan("1.")} Add components: ${chalk.bold("npx veloria-ui add button card modal")}
   ${chalk.cyan("2.")} Browse all:     ${chalk.bold("npx veloria-ui list")}
-  ${chalk.cyan("3.")} Docs:           ${chalk.bold("https://veloria-ui.vercel.app/")}
+  ${chalk.cyan("3.")} Docs:           ${chalk.bold("https://ui-veloria.vercel.app/")}
   ${chalk.cyan("4.")} Issues:         ${chalk.bold("https://github.com/JohnDev19/Veloria-UI/issues")}
 `);
   });
@@ -167,57 +165,45 @@ program
     components.forEach(resolve);
     if (!toAdd.size) return;
 
-    const configPath = path.join(cwd, "atlas.config.json");
+    const configPath = path.join(cwd, "veloria.config.json");
     const config = fs.existsSync(configPath)
       ? fs.readJsonSync(configPath) as { aliases?: { components?: string } }
       : null;
     const aliasDir = config?.aliases?.components?.replace(/^@\//, "");
     const targetDir = path.join(cwd, opts.dir ?? aliasDir ?? "components/ui");
 
-    console.log(chalk.bold.blue("\n  Veloria UI Add\n") + chalk.dim(`  Adding: ${[...toAdd].join(", ")}\n`));
+    fs.ensureDirSync(targetDir);
 
-    const allDeps = new Set<string>();
-    for (const name of toAdd) COMPONENTS_BY_NAME.get(name)!.deps.forEach((d) => allDeps.add(d));
-
-    // Write component stubs
+    // Copy files
     for (const name of toAdd) {
-      const spinner = ora(`Adding ${chalk.bold(name)}`).start();
-      const pascal = name.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
-      const dir = path.join(targetDir, name);
-      await fs.ensureDir(dir);
-      const file = path.join(dir, "index.tsx");
-
-      if (fs.existsSync(file) && !opts.overwrite) {
-        spinner.warn(chalk.yellow(`${name} already exists  (--overwrite to replace)`));
+      const meta = COMPONENTS_BY_NAME.get(name)!;
+      const src  = path.join(__dirname, "../components", meta.category, `${name}.tsx`);
+      const dest = path.join(targetDir, `${name}.tsx`);
+      if (!opts.overwrite && fs.existsSync(dest)) {
+        console.log(chalk.yellow(`  ⚠  ${name}.tsx already exists — skipping (use --overwrite to replace)`));
         continue;
       }
-
-      await fs.writeFile(file,
-`/**
- * Veloria UI — ${pascal}
- *
- * Added by the veloria-ui CLI. This file is yours — edit it however you want.
- * Re-export from veloria-ui to stay in sync, or paste the full source here
- * to customise the internals.
- *
- * Docs:   https://veloria-ui.vercel.app/components/${name}
- * Source: https://github.com/JohnDev19/Veloria-UI
- */
-
-export { ${pascal} } from "veloria-ui";
-export type { ${pascal}Props } from "veloria-ui";
-`);
-      spinner.succeed(chalk.green(`${name}  →  ${path.relative(cwd, file)}`));
+      if (fs.existsSync(src)) {
+        fs.copyFileSync(src, dest);
+        console.log(chalk.green("  ✔") + `  ${path.relative(cwd, dest)}`);
+      } else {
+        console.log(chalk.yellow(`  ⚠  Source not found for ${name} — skipping`));
+      }
     }
 
     // Install npm deps
-    if (opts.install !== false && allDeps.size > 0) {
+    const allDeps = new Set<string>();
+    for (const name of toAdd) {
+      const meta = COMPONENTS_BY_NAME.get(name)!;
+      meta.deps?.forEach((d) => allDeps.add(d));
+    }
+    if (allDeps.size && opts.install !== false) {
       const pm = detectPM(cwd);
-      const spinner = ora(`Installing ${allDeps.size} package(s)…`).start();
+      const deps = [...allDeps];
+      const spinner = ora(`  Installing ${deps.join(", ")}…`).start();
       try {
-        const deps = [...allDeps];
-        const cmd = pm === "pnpm" ? ["pnpm", "add", ...deps]
-                  : pm === "bun"  ? ["bun",  "add", ...deps]
+        const cmd = pm === "bun"  ? ["bun",  "add", ...deps]
+                  : pm === "pnpm" ? ["pnpm", "add", ...deps]
                   : pm === "yarn" ? ["yarn", "add", ...deps]
                                   : ["npm",  "install", ...deps];
         await execa(cmd[0], cmd.slice(1), { cwd });
@@ -271,8 +257,6 @@ program
     }
     console.log(chalk.bold.blue(`\n  diff: ${component}\n`) +
       chalk.dim("  Comparing local copy to latest in the veloria-ui registry…\n"));
-    // Full diff requires fetching from the registry — tracked here:
-    // https://github.com/JohnDev19/Veloria-UI/issues
     console.log(chalk.yellow("  ⚠  Registry diff isn't wired up yet."));
     console.log(chalk.dim(`  Check the latest source at:\n`) +
       chalk.cyan(`  https://github.com/JohnDev19/Veloria-UI/tree/main/src/components\n`));

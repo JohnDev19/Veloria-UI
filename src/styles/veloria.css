@@ -1,113 +1,252 @@
-/*
- * Veloria UI — Design System Stylesheet
- * v0.1.3
- *
- * Import once in your app root:
- *   import "veloria-ui/styles";
- */
+/* ─── Veloria UI — Design Token System ──────────────────────────────────── */
+/* Import this once at your app root:                                         */
+/*   import "veloria-ui/styles";                                              */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Light Theme Tokens ─────────────────────────────────────────────────── */
+
 @layer base {
-  *, *::before, *::after { box-sizing: border-box; }
-
   :root {
-    --background:             0 0% 100%;
-    --foreground:             224 71% 4%;
-    --card:                   0 0% 100%;
-    --card-foreground:        224 71% 4%;
-    --popover:                0 0% 100%;
-    --popover-foreground:     224 71% 4%;
-    --primary:                262 83% 58%;
-    --primary-foreground:     0 0% 100%;
-    --secondary:              220 14% 96%;
-    --secondary-foreground:   220 9% 46%;
-    --muted:                  220 14% 96%;
-    --muted-foreground:       220 9% 46%;
-    --accent:                 220 14% 96%;
-    --accent-foreground:      220 9% 10%;
-    --destructive:            0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --success:                142 76% 36%;
-    --success-foreground:     0 0% 100%;
-    --warning:                38 92% 50%;
-    --warning-foreground:     0 0% 100%;
-    --info:                   199 89% 48%;
-    --info-foreground:        0 0% 100%;
-    --border:                 220 13% 91%;
-    --input:                  220 13% 91%;
-    --ring:                   262 83% 58%;
-    --radius:                 0.5rem;
+    --background:         0 0% 100%;
+    --foreground:         224 71.4% 4.1%;
 
-    /* ── Classic Variant Tokens ─────────────────────────────── */
-    --classic-bg:             36 25% 94%;
-    --classic-bg-hover:       36 25% 90%;
-    --classic-surface:        36 20% 97%;
-    --classic-fg:             25 30% 15%;
-    --classic-border:         30 20% 65%;
-    --classic-highlight:      36 60% 98%;
-    --classic-muted:          30 15% 55%;
-    --classic-placeholder:    30 10% 65%;
-    --classic-ring:           30 40% 45%;
-    --classic-input-bg:       36 30% 99%;
+    --card:               0 0% 100%;
+    --card-foreground:    224 71.4% 4.1%;
+
+    --popover:            0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+
+    --primary:            262.1 83.3% 57.8%;
+    --primary-foreground: 210 20% 98%;
+
+    --secondary:          220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+
+    --muted:              220 14.3% 95.9%;
+    --muted-foreground:   220 8.9% 46.1%;
+
+    --accent:             220 14.3% 95.9%;
+    --accent-foreground:  220.9 39.3% 11%;
+
+    --destructive:        0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+
+    --success:            142.1 76.2% 36.3%;
+    --success-foreground: 355.7 100% 97.3%;
+
+    --warning:            47.9 95.8% 53.1%;
+    --warning-foreground: 26 83.3% 14.1%;
+
+    --info:               221.2 83.2% 53.3%;
+    --info-foreground:    210 20% 98%;
+
+    --border:             220 13% 91%;
+    --input:              220 13% 91%;
+    --ring:               262.1 83.3% 57.8%;
+
+    --radius: 0.5rem;
+
+    --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+                 "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans",
+                 sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+                 "Segoe UI Symbol", "Noto Color Emoji";
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+                 "Liberation Mono", "Courier New", monospace;
   }
+
+  /* ─── Dark Theme Tokens ─────────────────────────────────────────────────── */
 
   .dark {
-    --background:             224 71% 4%;
-    --foreground:             210 20% 98%;
-    --card:                   224 71% 4%;
-    --card-foreground:        210 20% 98%;
-    --popover:                224 71% 4%;
-    --popover-foreground:     210 20% 98%;
-    --primary:                262 83% 68%;
-    --primary-foreground:     0 0% 100%;
-    --secondary:              215 28% 17%;
-    --secondary-foreground:   210 20% 98%;
-    --muted:                  215 28% 17%;
-    --muted-foreground:       217 11% 65%;
-    --accent:                 215 28% 17%;
-    --accent-foreground:      210 20% 98%;
-    --destructive:            0 62% 50%;
-    --destructive-foreground: 210 20% 98%;
-    --border:                 215 28% 17%;
-    --input:                  215 28% 17%;
-    --ring:                   262 83% 68%;
+    --background:         224 71.4% 4.1%;
+    --foreground:         210 20% 98%;
 
-    /* ── Classic Dark Tokens ────────────────────────────────── */
-    --classic-bg:             25 20% 12%;
-    --classic-bg-hover:       25 20% 16%;
-    --classic-surface:        25 18% 10%;
-    --classic-fg:             36 30% 88%;
-    --classic-border:         30 15% 30%;
-    --classic-highlight:      36 20% 25%;
-    --classic-muted:          30 12% 50%;
-    --classic-placeholder:    30 10% 40%;
-    --classic-ring:           30 35% 55%;
-    --classic-input-bg:       25 20% 9%;
+    --card:               224 71.4% 4.1%;
+    --card-foreground:    210 20% 98%;
+
+    --popover:            224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary:            263.4 70% 50.4%;
+    --primary-foreground: 210 20% 98%;
+
+    --secondary:          215 27.9% 16.9%;
+    --secondary-foreground: 210 20% 98%;
+
+    --muted:              215 27.9% 16.9%;
+    --muted-foreground:   217.9 10.6% 64.9%;
+
+    --accent:             215 27.9% 16.9%;
+    --accent-foreground:  210 20% 98%;
+
+    --destructive:        0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+
+    --success:            142.1 70.6% 45.3%;
+    --success-foreground: 144.9 80.4% 10%;
+
+    --warning:            47.9 95.8% 53.1%;
+    --warning-foreground: 26 83.3% 14.1%;
+
+    --info:               217.2 91.2% 59.8%;
+    --info-foreground:    222.2 47.4% 11.2%;
+
+    --border:             215 27.9% 16.9%;
+    --input:              215 27.9% 16.9%;
+    --ring:               263.4 70% 50.4%;
   }
 }
 
-/* ── Animations ─────────────────────────────────────────────────────── */
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(calc(-100% - var(--marquee-gap, 2rem))); }
-}
-@keyframes marquee-reverse {
-  from { transform: translateX(calc(-100% - var(--marquee-gap, 2rem))); }
-  to   { transform: translateX(0); }
-}
-@keyframes ripple {
-  0%   { width: 8px; height: 8px; opacity: 0.6; }
-  100% { width: 300px; height: 300px; opacity: 0; }
-}
-@keyframes gradient-x {
-  0%, 100% { background-position: 0% center; }
-  50%       { background-position: 100% center; }
+/* ─── Base Styles ────────────────────────────────────────────────────────── */
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
 }
 
-.animate-marquee         { animation: marquee var(--marquee-duration, 30s) linear infinite; }
-.animate-marquee-reverse { animation: marquee-reverse var(--marquee-duration, 30s) linear infinite; }
-.animate-ripple          { animation: ripple 0.6s ease-out forwards; }
-.animate-gradient-x      { animation: gradient-x 3s ease infinite; background-size: 200% auto; }
+/* ─── Component Animations ───────────────────────────────────────────────── */
+
+@layer utilities {
+  @keyframes veloria-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes veloria-ping {
+    75%, 100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
+  @keyframes veloria-pulse {
+    50% { opacity: 0.5; }
+  }
+
+  @keyframes veloria-bounce {
+    0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+    50% { transform: none; animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+  }
+
+  @keyframes veloria-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes veloria-fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes veloria-slide-in-from-top {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+  }
+
+  @keyframes veloria-slide-in-from-bottom {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  @keyframes veloria-slide-in-from-left {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+
+  @keyframes veloria-slide-in-from-right {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+
+  @keyframes veloria-zoom-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes veloria-zoom-out {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.96); }
+  }
+
+  .animate-in {
+    animation: veloria-fade-in 150ms ease;
+  }
+
+  .fade-in-0 {
+    animation: veloria-fade-in 150ms ease;
+  }
+
+  .fade-out-0 {
+    animation: veloria-fade-out 150ms ease;
+  }
+
+  .zoom-in-95 {
+    animation: veloria-zoom-in 150ms ease;
+  }
+
+  .zoom-out-95 {
+    animation: veloria-zoom-out 150ms ease;
+  }
+
+  .slide-in-from-top {
+    animation: veloria-slide-in-from-top 150ms ease;
+  }
+
+  .slide-in-from-bottom {
+    animation: veloria-slide-in-from-bottom 150ms ease;
+  }
+
+  .slide-in-from-left {
+    animation: veloria-slide-in-from-left 200ms ease;
+  }
+
+  .slide-in-from-right {
+    animation: veloria-slide-in-from-right 200ms ease;
+  }
+
+  /* Composable data-state-based animations */
+  [data-state="open"]   { animation: veloria-fade-in 150ms ease; }
+  [data-state="closed"] { animation: veloria-fade-out 150ms ease; }
+}
+
+/* ─── Custom Scrollbars ──────────────────────────────────────────────────── */
+
+@layer utilities {
+  .veloria-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .veloria-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .veloria-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .veloria-scrollbar::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+  }
+
+  .veloria-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.4);
+  }
+}

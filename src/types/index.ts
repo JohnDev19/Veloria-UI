@@ -42,7 +42,7 @@ export type Side = "top" | "right" | "bottom" | "left";
 
 // ─── Shared Component Props ──────────────────────────────────────────────────
 
-export interface AtlasBaseProps {
+export interface VeloriaBaseProps {
   /** Additional CSS class names */
   className?: string;
   /** Inline style overrides */
@@ -51,7 +51,7 @@ export interface AtlasBaseProps {
   [key: `data-${string}`]: unknown;
 }
 
-export interface AtlasAriaProps {
+export interface VeloriaAriaProps {
   "aria-label"?: string;
   "aria-labelledby"?: string;
   "aria-describedby"?: string;

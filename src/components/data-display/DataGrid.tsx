@@ -11,7 +11,8 @@ export interface DataGridColumn<T> {
   render?: (value: T[keyof T], row: T, rowIndex: number) => React.ReactNode;
 }
 
-export interface DataGridProps<T extends Record<string, unknown>> extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
+export interface DataGridProps<T extends Record<string, unknown>>
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
   columns: DataGridColumn<T>[];
   rows: T[];
   rowHeight?: number;
@@ -43,23 +44,27 @@ const DEFAULT_HEADER_HEIGHT = 38;
 const DEFAULT_COLUMN_WIDTH = 150;
 const MIN_COLUMN_WIDTH = 60;
 
-function DataGrid<T extends Record<string, unknown>>({
-  columns: columnsProp,
-  rows,
-  rowHeight = DEFAULT_ROW_HEIGHT,
-  headerHeight = DEFAULT_HEADER_HEIGHT,
-  height = 480,
-  defaultSort,
-  onChange,
-  onCellEdit,
-  getRowId,
-  selectedRows,
-  onRowSelect,
-  loading = false,
-  emptyMessage = "No data",
-  className,
-  ...props
-}: DataGridProps<T>) {
+// forwarded ref passed from the wrapper
+function DataGridInner<T extends Record<string, unknown>>(
+  {
+    columns: columnsProp,
+    rows,
+    rowHeight = DEFAULT_ROW_HEIGHT,
+    headerHeight = DEFAULT_HEADER_HEIGHT,
+    height = 480,
+    defaultSort,
+    onChange,
+    onCellEdit,
+    getRowId,
+    selectedRows,
+    onRowSelect,
+    loading = false,
+    emptyMessage = "No data",
+    className,
+    ...props
+  }: DataGridProps<T>,
+  ref: React.ForwardedRef<HTMLDivElement>
+) {
   const bodyRef = React.useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = React.useState(0);
   const [sort, setSort] = React.useState<SortState | null>(defaultSort ?? null);
@@ -85,9 +90,9 @@ function DataGrid<T extends Record<string, unknown>>({
   const totalHeight = sorted.length * rowHeight;
   const visibleStart = Math.max(0, Math.floor(scrollTop / rowHeight) - OVERSCAN);
   const visibleCount = Math.ceil((height - headerHeight) / rowHeight) + OVERSCAN * 2;
-  const visibleEnd   = Math.min(sorted.length, visibleStart + visibleCount);
-  const visibleRows  = sorted.slice(visibleStart, visibleEnd);
-  const paddingTop   = visibleStart * rowHeight;
+  const visibleEnd = Math.min(sorted.length, visibleStart + visibleCount);
+  const visibleRows = sorted.slice(visibleStart, visibleEnd);
+  const paddingTop = visibleStart * rowHeight;
   const paddingBottom = Math.max(0, (sorted.length - visibleEnd) * rowHeight);
 
   const rowId = (row: T, i: number): string | number =>
@@ -110,9 +115,6 @@ function DataGrid<T extends Record<string, unknown>>({
 
   const commitEdit = () => {
     if (!editing) return;
-    const absIndex = visibleStart + sorted.findIndex(
-      (_, i) => visibleStart + i === editing.rowIndex
-    );
     onCellEdit?.(editing.rowIndex, editing.key as keyof T & string, editValue);
     if (onChange) {
       const next = sorted.map((row, i) =>
@@ -182,7 +184,9 @@ function DataGrid<T extends Record<string, unknown>>({
 
   return (
     <div
-      ref={props.ref as React.Ref<HTMLDivElement>}
+      ref={ref}
+      role="grid"
+      aria-rowcount={sorted.length}
       className={cn(
         "veloria-data-grid relative overflow-hidden rounded-md border border-border bg-background text-sm",
         className
@@ -198,6 +202,7 @@ function DataGrid<T extends Record<string, unknown>>({
         {columnsProp.map((col, ci) => (
           <div
             key={col.key}
+            role="columnheader"
             className="relative flex shrink-0 select-none items-center gap-1 px-3 font-medium text-muted-foreground"
             style={{ width: colWidths[ci] }}
           >
@@ -243,21 +248,23 @@ function DataGrid<T extends Record<string, unknown>>({
                 const isSelected = selectedRows?.has(id);
                 return (
                   <div
-                    key={id}
+                    key={String(id)}
                     role="row"
                     aria-selected={isSelected}
                     onClick={() => toggleRow(id)}
                     className={cn(
                       "flex border-b border-border/60 last:border-0",
-                      isSelected && "bg-primary/8",
+                      isSelected && "bg-primary/10",
                       !isSelected && "hover:bg-muted/40"
                     )}
                     style={{ height: rowHeight }}
                   >
                     {columnsProp.map((col, ci) => {
                       const raw = row[col.key];
-                      const isEditing = editing?.rowIndex === absIdx && editing.key === col.key;
-                      const flashing = copyFlash?.rowIndex === absIdx && copyFlash.key === col.key;
+                      const isEditing =
+                        editing?.rowIndex === absIdx && editing.key === col.key;
+                      const flashing =
+                        copyFlash?.rowIndex === absIdx && copyFlash.key === col.key;
                       return (
                         <div
                           key={col.key}
@@ -265,7 +272,7 @@ function DataGrid<T extends Record<string, unknown>>({
                           className={cn(
                             "relative flex shrink-0 items-center overflow-hidden px-3",
                             col.editable && "cursor-text",
-                            flashing && "bg-success/10"
+                            flashing && "bg-green-500/10"
                           )}
                           style={{ width: colWidths[ci] }}
                           onDoubleClick={() => startEdit(absIdx, col.key, raw)}
@@ -286,7 +293,9 @@ function DataGrid<T extends Record<string, unknown>>({
                           ) : col.render ? (
                             col.render(raw, row, absIdx)
                           ) : (
-                            <span className="truncate text-foreground">{String(raw ?? "")}</span>
+                            <span className="truncate text-foreground">
+                              {String(raw ?? "")}
+                            </span>
                           )}
                         </div>
                       );
@@ -303,7 +312,14 @@ function DataGrid<T extends Record<string, unknown>>({
   );
 }
 
-DataGrid.displayName = "DataGrid";
+// cast needed because forwardRef doesn't support generics directly
+const DataGrid = React.forwardRef(DataGridInner) as <T extends Record<string, unknown>>(
+  props: DataGridProps<T> & { ref?: React.Ref<HTMLDivElement> }
+) => React.ReactElement;
+
+(DataGrid as { displayName?: string }).displayName = "DataGrid";
+
+// ─── SortIcon ──────────────────────────────────────────────────────────────
 
 function SortIcon({
   active,
@@ -332,6 +348,8 @@ function SortIcon({
     </svg>
   );
 }
+
+// ─── LoadingRows ───────────────────────────────────────────────────────────
 
 function LoadingRows({
   count,

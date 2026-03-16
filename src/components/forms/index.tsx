@@ -4,35 +4,118 @@ import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
 import * as SwitchPrimitive from "@radix-ui/react-switch";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import * as SelectPrimitive from "@radix-ui/react-select";
+import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../utils/cn";
 
-// ─── TextArea ──────────────────────────────────────────────────────────────
+// ─── Input ─────────────────────────────────────────────────────────────────
+
+const inputVariants = cva(
+  [
+    "atlas-input flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+    "ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium",
+    "placeholder:text-muted-foreground",
+    "transition-shadow duration-150",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+    "disabled:cursor-not-allowed disabled:opacity-50",
+  ],
+  {
+    variants: {
+      size: {
+        sm: "h-8 px-2.5 text-xs",
+        md: "h-9 px-3 text-sm",
+        lg: "h-10 px-4 text-base",
+      },
+      invalid: {
+        true: "border-destructive focus-visible:ring-destructive",
+      },
+    },
+    defaultVariants: { size: "md" },
+  }
+);
+
+export interface InputProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
+    VariantProps<typeof inputVariants> {
+  leftElement?: React.ReactNode;
+  rightElement?: React.ReactNode;
+  invalid?: boolean;
+}
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, size, invalid, leftElement, rightElement, ...props }, ref) => {
+    if (leftElement || rightElement) {
+      return (
+        <div className="relative flex items-center w-full">
+          {leftElement && (
+            <span className="absolute left-3 text-muted-foreground [&>svg]:h-4 [&>svg]:w-4 pointer-events-none">
+              {leftElement}
+            </span>
+          )}
+          <input
+            type={type}
+            className={cn(
+              inputVariants({ size, invalid: invalid ?? false }),
+              leftElement && "pl-9",
+              rightElement && "pr-9",
+              className
+            )}
+            ref={ref}
+            aria-invalid={invalid}
+            {...props}
+          />
+          {rightElement && (
+            <span className="absolute right-3 text-muted-foreground [&>svg]:h-4 [&>svg]:w-4">
+              {rightElement}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <input
+        type={type}
+        className={cn(inputVariants({ size, invalid: invalid ?? false }), className)}
+        ref={ref}
+        aria-invalid={invalid}
+        {...props}
+      />
+    );
+  }
+);
+Input.displayName = "Input";
+
+// ─── TextArea ─────────────────────────────────────────────────────────────
 
 export interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  hasError?: boolean;
-  resize?: "none" | "vertical" | "horizontal" | "both";
+  invalid?: boolean;
+  resize?: "none" | "both" | "horizontal" | "vertical";
 }
 
 const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
-  ({ className, hasError, resize = "vertical", style, ...props }, ref) => (
+  ({ className, invalid, resize = "vertical", ...props }, ref) => (
     <textarea
-      ref={ref}
       className={cn(
-        "veloria-textarea flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+        "atlas-textarea flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
         "ring-offset-background placeholder:text-muted-foreground",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        hasError && "border-destructive focus-visible:ring-destructive",
+        "disabled:cursor-not-allowed disabled:opacity-50 transition-shadow",
+        resize === "none" && "resize-none",
+        resize === "both" && "resize",
+        resize === "horizontal" && "resize-x",
+        resize === "vertical" && "resize-y",
+        invalid && "border-destructive focus-visible:ring-destructive",
         className
       )}
-      style={{ resize, ...style }}
+      ref={ref}
+      aria-invalid={invalid}
       {...props}
     />
   )
 );
 TextArea.displayName = "TextArea";
 
-// ─── Select (Radix) ────────────────────────────────────────────────────────
+// ─── Select ───────────────────────────────────────────────────────────────
 
 const Select = SelectPrimitive.Root;
 const SelectGroup = SelectPrimitive.Group;
@@ -40,16 +123,17 @@ const SelectValue = SelectPrimitive.Value;
 
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & { hasError?: boolean }
->(({ className, children, hasError, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & { invalid?: boolean }
+>(({ className, children, invalid, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "veloria-select-trigger flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm",
+      "atlas-select-trigger flex h-9 w-full items-center justify-between rounded-md",
+      "border border-input bg-background px-3 py-2 text-sm",
       "ring-offset-background placeholder:text-muted-foreground",
       "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
       "disabled:cursor-not-allowed disabled:opacity-50",
-      hasError && "border-destructive focus:ring-destructive",
+      invalid && "border-destructive focus:ring-destructive",
       "[&>span]:line-clamp-1",
       className
     )}
@@ -63,7 +147,7 @@ const SelectTrigger = React.forwardRef<
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
-SelectTrigger.displayName = "SelectTrigger";
+SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
@@ -73,10 +157,10 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "veloria-select-content relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md",
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-        "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-        position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=top]:-translate-y-1",
+        "atlas-select-content relative z-50 min-w-[8rem] overflow-hidden rounded-md",
+        "border border-border bg-popover text-popover-foreground shadow-md",
+        "animate-in fade-in-0 zoom-in-95",
+        position === "popper" && "translate-y-1",
         className
       )}
       position={position}
@@ -88,15 +172,7 @@ const SelectContent = React.forwardRef<
     </SelectPrimitive.Content>
   </SelectPrimitive.Portal>
 ));
-SelectContent.displayName = "SelectContent";
-
-const SelectLabel = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Label>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
->(({ className, ...props }, ref) => (
-  <SelectPrimitive.Label ref={ref} className={cn("px-2 py-1.5 text-sm font-semibold", className)} {...props} />
-));
-SelectLabel.displayName = "SelectLabel";
+SelectContent.displayName = SelectPrimitive.Content.displayName;
 
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
@@ -105,63 +181,81 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none",
-      "focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm",
+      "outline-none focus:bg-accent focus:text-accent-foreground",
+      "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     {...props}
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+        </svg>
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
   </SelectPrimitive.Item>
 ));
-SelectItem.displayName = "SelectItem";
+SelectItem.displayName = SelectPrimitive.Item.displayName;
+
+const SelectLabel = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Label>,
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
+>(({ className, ...props }, ref) => (
+  <SelectPrimitive.Label ref={ref} className={cn("py-1.5 pl-8 pr-2 text-xs font-semibold text-muted-foreground", className)} {...props} />
+));
+SelectLabel.displayName = SelectPrimitive.Label.displayName;
 
 const SelectSeparator = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
 >(({ className, ...props }, ref) => (
-  <SelectPrimitive.Separator ref={ref} className={cn("-mx-1 my-1 h-px bg-muted", className)} {...props} />
+  <SelectPrimitive.Separator ref={ref} className={cn("-mx-1 my-1 h-px bg-border", className)} {...props} />
 ));
-SelectSeparator.displayName = "SelectSeparator";
+SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
 
-// ─── Checkbox ──────────────────────────────────────────────────────────────
+// ─── Checkbox ─────────────────────────────────────────────────────────────
 
 export interface CheckboxProps extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> {
-  label?: string;
+  label?: React.ReactNode;
   description?: string;
-  hasError?: boolean;
+  invalid?: boolean;
 }
 
 const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root>, CheckboxProps>(
-  ({ className, label, description, hasError, id, ...props }, ref) => {
-    const innerId = id ?? React.useId();
+  ({ className, label, description, invalid, id, ...props }, ref) => {
+    const checkboxId = id ?? React.useId();
+
     return (
-      <div className="veloria-checkbox flex items-start gap-3">
+      <div className="atlas-checkbox flex items-start gap-2.5">
         <CheckboxPrimitive.Root
           ref={ref}
-          id={innerId}
+          id={checkboxId}
           className={cn(
-            "peer mt-0.5 h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background",
+            "peer h-4 w-4 shrink-0 rounded border border-primary ring-offset-background",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             "disabled:cursor-not-allowed disabled:opacity-50",
             "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
-            hasError && "border-destructive",
+            invalid && "border-destructive",
             className
           )}
           {...props}
         >
           <CheckboxPrimitive.Indicator className="flex items-center justify-center text-current">
-            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
           </CheckboxPrimitive.Indicator>
         </CheckboxPrimitive.Root>
         {(label || description) && (
-          <div className="flex flex-col gap-0.5">
-            {label && <label htmlFor={innerId} className={cn("text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-50", hasError && "text-destructive")}>{label}</label>}
+          <div className="grid gap-0.5">
+            {label && (
+              <label htmlFor={checkboxId} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                {label}
+              </label>
+            )}
             {description && <p className="text-xs text-muted-foreground">{description}</p>}
           </div>
         )}
@@ -171,45 +265,52 @@ const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root
 );
 Checkbox.displayName = "Checkbox";
 
-// ─── RadioGroup ────────────────────────────────────────────────────────────
+// ─── RadioGroup ───────────────────────────────────────────────────────────
 
 export interface RadioOption {
   value: string;
-  label: string;
+  label: React.ReactNode;
   description?: string;
   disabled?: boolean;
 }
 
 export interface RadioGroupProps extends React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root> {
   options?: RadioOption[];
-  hasError?: boolean;
+  orientation?: "horizontal" | "vertical";
 }
 
 const RadioGroup = React.forwardRef<React.ElementRef<typeof RadioGroupPrimitive.Root>, RadioGroupProps>(
-  ({ className, options, hasError, children, ...props }, ref) => (
-    <RadioGroupPrimitive.Root ref={ref} className={cn("veloria-radio-group flex flex-col gap-3", className)} {...props}>
+  ({ className, options, orientation = "vertical", children, ...props }, ref) => (
+    <RadioGroupPrimitive.Root
+      ref={ref}
+      className={cn(
+        "atlas-radio-group",
+        orientation === "vertical" ? "flex flex-col gap-2" : "flex flex-row flex-wrap gap-4",
+        className
+      )}
+      {...props}
+    >
       {options
-        ? options.map((opt) => (
-            <div key={opt.value} className="flex items-start gap-3">
+        ? options.map((option) => (
+            <div key={option.value} className="flex items-start gap-2.5">
               <RadioGroupPrimitive.Item
-                id={`radio-${opt.value}`}
-                value={opt.value}
-                disabled={opt.disabled}
+                value={option.value}
+                disabled={option.disabled}
                 className={cn(
-                  "mt-0.5 h-4 w-4 shrink-0 rounded-full border border-primary ring-offset-background",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "mt-0.5 h-4 w-4 rounded-full border border-primary shrink-0",
+                  "ring-offset-background transition-colors",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                   "disabled:cursor-not-allowed disabled:opacity-50",
-                  "data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
-                  hasError && "border-destructive"
+                  "data-[state=checked]:border-primary"
                 )}
               >
                 <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-                  <div className="h-2 w-2 rounded-full bg-current" />
+                  <span className="h-2 w-2 rounded-full bg-primary" />
                 </RadioGroupPrimitive.Indicator>
               </RadioGroupPrimitive.Item>
-              <div className="flex flex-col gap-0.5">
-                <label htmlFor={`radio-${opt.value}`} className="text-sm font-medium leading-none cursor-pointer">{opt.label}</label>
-                {opt.description && <p className="text-xs text-muted-foreground">{opt.description}</p>}
+              <div>
+                <label className="text-sm font-medium cursor-pointer">{option.label}</label>
+                {option.description && <p className="text-xs text-muted-foreground">{option.description}</p>}
               </div>
             </div>
           ))
@@ -219,46 +320,51 @@ const RadioGroup = React.forwardRef<React.ElementRef<typeof RadioGroupPrimitive.
 );
 RadioGroup.displayName = "RadioGroup";
 
-// ─── Switch ────────────────────────────────────────────────────────────────
+// ─── Switch ───────────────────────────────────────────────────────────────
 
 export interface SwitchProps extends React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> {
-  label?: string;
+  label?: React.ReactNode;
   description?: string;
   size?: "sm" | "md" | "lg";
 }
 
+const switchSizes = {
+  sm: { root: "h-4 w-7", thumb: "h-3 w-3 data-[state=checked]:translate-x-3" },
+  md: { root: "h-5 w-9", thumb: "h-4 w-4 data-[state=checked]:translate-x-4" },
+  lg: { root: "h-6 w-11", thumb: "h-5 w-5 data-[state=checked]:translate-x-5" },
+};
+
 const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitive.Root>, SwitchProps>(
   ({ className, label, description, size = "md", id, ...props }, ref) => {
-    const innerId = id ?? React.useId();
+    const switchId = id ?? React.useId();
+    const sz = switchSizes[size];
+
     return (
-      <div className="veloria-switch flex items-center gap-3">
+      <div className="atlas-switch flex items-center gap-2.5">
         <SwitchPrimitive.Root
+          id={switchId}
           ref={ref}
-          id={innerId}
           className={cn(
             "peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent",
-            "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+            "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             "disabled:cursor-not-allowed disabled:opacity-50",
-            "data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
-            size === "sm" && "h-4 w-7",
-            size === "md" && "h-5 w-9",
-            size === "lg" && "h-6 w-11",
+            "bg-input data-[state=checked]:bg-primary",
+            sz.root,
             className
           )}
           {...props}
         >
           <SwitchPrimitive.Thumb
             className={cn(
-              "pointer-events-none block rounded-full bg-background shadow-lg ring-0 transition-transform",
-              size === "sm" && "h-3 w-3 data-[state=checked]:translate-x-3 data-[state=unchecked]:translate-x-0",
-              size === "md" && "h-4 w-4 data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0",
-              size === "lg" && "h-5 w-5 data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0",
+              "pointer-events-none block rounded-full bg-background shadow-lg ring-0",
+              "transition-transform translate-x-0",
+              sz.thumb
             )}
           />
         </SwitchPrimitive.Root>
         {(label || description) && (
-          <div className="flex flex-col gap-0.5">
-            {label && <label htmlFor={innerId} className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-50">{label}</label>}
+          <div>
+            {label && <label htmlFor={switchId} className="text-sm font-medium cursor-pointer">{label}</label>}
             {description && <p className="text-xs text-muted-foreground">{description}</p>}
           </div>
         )}
@@ -268,193 +374,98 @@ const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitive.Root>, S
 );
 Switch.displayName = "Switch";
 
-// ─── Slider ────────────────────────────────────────────────────────────────
+// ─── Slider ───────────────────────────────────────────────────────────────
 
-export interface SliderProps extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
-  showValue?: boolean;
-  formatValue?: (v: number) => string;
-}
-
-const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, SliderProps>(
-  ({ className, showValue, formatValue, ...props }, ref) => {
-    const val = props.value ?? props.defaultValue ?? [0];
-    return (
-      <div className="veloria-slider flex items-center gap-3">
-        <SliderPrimitive.Root
-          ref={ref}
-          className={cn("relative flex w-full touch-none select-none items-center", className)}
-          {...props}
-        >
-          <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-secondary">
-            <SliderPrimitive.Range className="absolute h-full bg-primary" />
-          </SliderPrimitive.Track>
-          {(Array.isArray(val) ? val : [val]).map((_, i) => (
-            <SliderPrimitive.Thumb
-              key={i}
-              className="block h-4 w-4 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-            />
-          ))}
-        </SliderPrimitive.Root>
-        {showValue && Array.isArray(val) && (
-          <span className="w-10 shrink-0 text-right text-sm font-medium tabular-nums">
-            {formatValue ? formatValue(val[0]) : val[0]}
-          </span>
+const Slider = React.forwardRef<
+  React.ElementRef<typeof SliderPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <SliderPrimitive.Root
+    ref={ref}
+    className={cn("atlas-slider relative flex w-full touch-none select-none items-center", className)}
+    {...props}
+  >
+    <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-secondary">
+      <SliderPrimitive.Range className="absolute h-full bg-primary" />
+    </SliderPrimitive.Track>
+    {(Array.isArray(props.value) ? props.value : props.defaultValue ?? [0]).map((_, i) => (
+      <SliderPrimitive.Thumb
+        key={i}
+        className={cn(
+          "block h-4 w-4 rounded-full border-2 border-primary bg-background shadow",
+          "ring-offset-background transition-colors",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          "disabled:pointer-events-none disabled:opacity-50"
         )}
-      </div>
-    );
-  }
-);
+      />
+    ))}
+  </SliderPrimitive.Root>
+));
 Slider.displayName = "Slider";
 
-// ─── RangeSlider ───────────────────────────────────────────────────────────
+// ─── RangeSlider ──────────────────────────────────────────────────────────
 
-export interface RangeSliderProps extends Omit<React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>, "value" | "onValueChange"> {
-  value?: [number, number];
-  onValueChange?: (val: [number, number]) => void;
-  showValues?: boolean;
-  formatValue?: (v: number) => string;
-}
+export type RangeSliderProps = React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>;
 
 const RangeSlider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, RangeSliderProps>(
-  ({ className, value, onValueChange, showValues, formatValue, ...props }, ref) => (
-    <div className="veloria-range-slider flex items-center gap-3">
-      {showValues && value && (
-        <span className="w-10 shrink-0 text-sm font-medium tabular-nums">{formatValue ? formatValue(value[0]) : value[0]}</span>
-      )}
-      <SliderPrimitive.Root
-        ref={ref}
-        className={cn("relative flex w-full touch-none select-none items-center", className)}
-        value={value}
-        onValueChange={(v) => onValueChange?.(v as [number, number])}
-        {...props}
-      >
-        <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-secondary">
-          <SliderPrimitive.Range className="absolute h-full bg-primary" />
-        </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb className="block h-4 w-4 rounded-full border-2 border-primary bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
-        <SliderPrimitive.Thumb className="block h-4 w-4 rounded-full border-2 border-primary bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" />
-      </SliderPrimitive.Root>
-      {showValues && value && (
-        <span className="w-10 shrink-0 text-sm font-medium tabular-nums">{formatValue ? formatValue(value[1]) : value[1]}</span>
-      )}
-    </div>
+  ({ className, defaultValue = [20, 80], ...props }, ref) => (
+    <Slider ref={ref} defaultValue={defaultValue} className={cn("atlas-range-slider", className)} {...props} />
   )
 );
 RangeSlider.displayName = "RangeSlider";
 
-// ─── DatePicker ────────────────────────────────────────────────────────────
+// ─── DatePicker ───────────────────────────────────────────────────────────
 
-export interface DatePickerProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
+export interface DatePickerProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
   label?: string;
-  hasError?: boolean;
-  errorMessage?: string;
+  invalid?: boolean;
 }
 
 const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
-  ({ className, label, hasError, errorMessage, id, ...props }, ref) => {
-    const innerId = id ?? React.useId();
+  ({ className, label, invalid, id, ...props }, ref) => {
+    const inputId = id ?? React.useId();
     return (
-      <div className="veloria-date-picker flex flex-col gap-1.5">
-        {label && <label htmlFor={innerId} className="text-sm font-medium leading-none">{label}</label>}
-        <input
+      <div className="atlas-date-picker grid gap-1.5 w-full">
+        {label && <label htmlFor={inputId} className="text-sm font-medium">{label}</label>}
+        <Input
           ref={ref}
+          id={inputId}
           type="date"
-          id={innerId}
-          className={cn(
-            "flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-            hasError && "border-destructive focus-visible:ring-destructive",
-            className
-          )}
+          invalid={invalid}
+          className={className}
           {...props}
         />
-        {hasError && errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
       </div>
     );
   }
 );
 DatePicker.displayName = "DatePicker";
 
-// ─── TimePicker ────────────────────────────────────────────────────────────
+// ─── TimePicker ───────────────────────────────────────────────────────────
 
-export interface TimePickerProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
+export interface TimePickerProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {
   label?: string;
-  hasError?: boolean;
-  errorMessage?: string;
+  invalid?: boolean;
 }
 
 const TimePicker = React.forwardRef<HTMLInputElement, TimePickerProps>(
-  ({ className, label, hasError, errorMessage, id, ...props }, ref) => {
-    const innerId = id ?? React.useId();
+  ({ className, label, invalid, id, ...props }, ref) => {
+    const inputId = id ?? React.useId();
     return (
-      <div className="veloria-time-picker flex flex-col gap-1.5">
-        {label && <label htmlFor={innerId} className="text-sm font-medium leading-none">{label}</label>}
-        <input
-          ref={ref}
-          type="time"
-          id={innerId}
-          className={cn(
-            "flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-            "disabled:cursor-not-allowed disabled:opacity-50",
-            hasError && "border-destructive focus-visible:ring-destructive",
-            className
-          )}
-          {...props}
-        />
-        {hasError && errorMessage && <p className="text-xs text-destructive">{errorMessage}</p>}
+      <div className="atlas-time-picker grid gap-1.5 w-full">
+        {label && <label htmlFor={inputId} className="text-sm font-medium">{label}</label>}
+        <Input ref={ref} id={inputId} type="time" invalid={invalid} className={className} {...props} />
       </div>
     );
   }
 );
 TimePicker.displayName = "TimePicker";
 
-// ─── FormField, FormLabel, FormError ───────────────────────────────────────
-
-export interface FormFieldProps extends React.HTMLAttributes<HTMLDivElement> {
-  label?: string;
-  description?: string;
-  error?: string;
-  required?: boolean;
-  htmlFor?: string;
-}
-
-const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>(
-  ({ className, label, description, error, required, htmlFor, children, ...props }, ref) => (
-    <div ref={ref} className={cn("veloria-form-field flex flex-col gap-1.5", className)} {...props}>
-      {label && (
-        <label htmlFor={htmlFor} className={cn("text-sm font-medium leading-none", error && "text-destructive")}>
-          {label}{required && <span className="ml-0.5 text-destructive" aria-hidden="true">*</span>}
-        </label>
-      )}
-      {children}
-      {description && !error && <p className="text-xs text-muted-foreground">{description}</p>}
-      {error && <p className="text-xs text-destructive">{error}</p>}
-    </div>
-  )
-);
-FormField.displayName = "FormField";
-
-const FormLabel = React.forwardRef<HTMLLabelElement, React.LabelHTMLAttributes<HTMLLabelElement> & { required?: boolean; hasError?: boolean }>(
-  ({ className, required, hasError, children, ...props }, ref) => (
-    <label ref={ref} className={cn("veloria-form-label text-sm font-medium leading-none", hasError && "text-destructive", className)} {...props}>
-      {children}{required && <span className="ml-0.5 text-destructive" aria-hidden="true">*</span>}
-    </label>
-  )
-);
-FormLabel.displayName = "FormLabel";
-
-const FormError = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, ...props }, ref) => (
-    <p ref={ref} className={cn("veloria-form-error text-xs text-destructive", className)} role="alert" {...props} />
-  )
-);
-FormError.displayName = "FormError";
-
 export {
+  Input, inputVariants,
   TextArea,
-  Select, SelectGroup, SelectValue, SelectTrigger, SelectContent, SelectLabel, SelectItem, SelectSeparator,
+  Select, SelectGroup, SelectValue, SelectTrigger, SelectContent,
+  SelectItem, SelectLabel, SelectSeparator,
   Checkbox,
   RadioGroup,
   Switch,
@@ -462,20 +473,4 @@ export {
   RangeSlider,
   DatePicker,
   TimePicker,
-  FormField,
-  FormLabel,
-  FormError,
-};
-
-export type {
-  TextAreaProps,
-  CheckboxProps,
-  RadioOption,
-  RadioGroupProps,
-  SwitchProps,
-  SliderProps,
-  RangeSliderProps,
-  DatePickerProps,
-  TimePickerProps,
-  FormFieldProps,
 };

@@ -3,8 +3,8 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import { TextArea, FormField, FormLabel, FormError } from "veloria-ui";
-import type { TextAreaProps } from "veloria-ui";
+import { TextArea, FormField, FormLabel, FormError } from "../index";
+import type { TextAreaProps } from "../index";
 
 export interface RhfTextAreaProps<T extends FieldValues>
   extends Omit<TextAreaProps, "name" | "value" | "onChange" | "onBlur" | "ref"> {

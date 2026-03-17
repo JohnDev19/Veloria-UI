@@ -3,8 +3,8 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import { MultiSelect, FormField, FormLabel, FormError } from "veloria-ui";
-import type { MultiSelectProps } from "veloria-ui";
+import { MultiSelect, FormField, FormLabel, FormError } from "../index";
+import type { MultiSelectProps } from "../index";
 
 export interface RhfMultiSelectProps<T extends FieldValues>
   extends Omit<MultiSelectProps, "value" | "onChange" | "ref"> {

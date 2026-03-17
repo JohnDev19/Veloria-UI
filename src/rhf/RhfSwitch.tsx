@@ -3,8 +3,8 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import { Switch, FormField, FormError } from "veloria-ui";
-import type { SwitchProps } from "veloria-ui";
+import { Switch, FormField, FormError } from "../index";
+import type { SwitchProps } from "../index";
 
 export interface RhfSwitchProps<T extends FieldValues>
   extends Omit<SwitchProps, "name" | "checked" | "onCheckedChange" | "ref"> {

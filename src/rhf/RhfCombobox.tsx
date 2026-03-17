@@ -3,8 +3,8 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import { Combobox, FormField, FormLabel, FormError } from "veloria-ui";
-import type { ComboboxOption } from "veloria-ui";
+import { Combobox, FormField, FormLabel, FormError } from "../index";
+import type { ComboboxOption } from "../index";
 
 export interface RhfComboboxProps<T extends FieldValues> {
   name: Path<T>;

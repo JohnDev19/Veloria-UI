@@ -22,6 +22,9 @@ const sharedExternal = [
   "lowlight",
   // react-hook-form — optional peer dep, never bundle it
   "react-hook-form",
+  // veloria-ui itself — the rhf entry imports from it; treat as external
+  // so tsup doesn't try to resolve ./dist/index.mjs during the build
+  "veloria-ui",
 ];
 
 const cliExternal = [

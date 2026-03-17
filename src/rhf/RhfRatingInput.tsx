@@ -3,8 +3,8 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import { RatingInput, FormField, FormLabel, FormError } from "veloria-ui";
-import type { RatingInputProps } from "veloria-ui";
+import { RatingInput, FormField, FormLabel, FormError } from "../index";
+import type { RatingInputProps } from "../index";
 
 export interface RhfRatingInputProps<T extends FieldValues>
   extends Omit<RatingInputProps, "value" | "onChange" | "ref"> {

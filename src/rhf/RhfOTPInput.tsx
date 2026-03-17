@@ -3,8 +3,8 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import { OTPInput, FormField, FormLabel, FormError } from "veloria-ui";
-import type { OTPInputProps } from "veloria-ui";
+import { OTPInput, FormField, FormLabel, FormError } from "../index";
+import type { OTPInputProps } from "../index";
 
 export interface RhfOTPInputProps<T extends FieldValues>
   extends Omit<OTPInputProps, "value" | "onChange" | "ref"> {

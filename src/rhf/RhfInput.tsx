@@ -3,8 +3,8 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import { Input, FormField, FormLabel, FormError } from "veloria-ui";
-import type { InputProps } from "veloria-ui";
+import { Input, FormField, FormLabel, FormError } from "../index";
+import type { InputProps } from "../index";
 
 export interface RhfInputProps<T extends FieldValues>
   extends Omit<InputProps, "name" | "value" | "onChange" | "onBlur" | "ref"> {

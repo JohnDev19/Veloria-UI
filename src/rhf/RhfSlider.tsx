@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import { Slider, FormField, FormLabel, FormError } from "veloria-ui";
+import { Slider, FormField, FormLabel, FormError } from "../index";
 
 export interface RhfSliderProps<T extends FieldValues> {
   name: Path<T>;
@@ -31,7 +31,7 @@ export function RhfSlider<T extends FieldValues>({
       name={name}
       control={control}
       render={({ field, fieldState }) => {
-        // radix Slider uses number[], RHF stores a plain number
+        // Radix Slider uses number[], RHF stores a plain number
         const asArray: number[] = Array.isArray(field.value)
           ? field.value
           : [typeof field.value === "number" ? field.value : min];

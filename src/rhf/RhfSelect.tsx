@@ -12,7 +12,7 @@ import {
   FormField,
   FormLabel,
   FormError,
-} from "veloria-ui";
+} from "../index";
 
 export interface RhfSelectOption {
   value: string;

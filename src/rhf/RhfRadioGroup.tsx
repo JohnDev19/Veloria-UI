@@ -3,8 +3,8 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import { RadioGroup, FormField, FormLabel, FormError } from "veloria-ui";
-import type { RadioOption } from "veloria-ui";
+import { RadioGroup, FormField, FormLabel, FormError } from "../index";
+import type { RadioOption } from "../index";
 
 export interface RhfRadioGroupProps<T extends FieldValues> {
   name: Path<T>;

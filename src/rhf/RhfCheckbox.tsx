@@ -3,8 +3,8 @@
 import * as React from "react";
 import { Controller } from "react-hook-form";
 import type { Control, FieldValues, Path } from "react-hook-form";
-import { Checkbox, FormField, FormError } from "veloria-ui";
-import type { CheckboxProps } from "veloria-ui";
+import { Checkbox, FormField, FormError } from "../index";
+import type { CheckboxProps } from "../index";
 
 export interface RhfCheckboxProps<T extends FieldValues>
   extends Omit<CheckboxProps, "name" | "checked" | "onCheckedChange" | "ref"> {

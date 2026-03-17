@@ -9,6 +9,206 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [0.1.5] — 2026-03-17
 
+### `veloria-ui/motion` — Animated presence system
+
+A new zero-dependency animation sub-path built entirely on the **Web Animations API**. No additional `npm install` required — it ships inside the `veloria-ui` package and adds `0 bytes` to your bundle unless you actually import it.
+
+Import from `veloria-ui/motion`:
+
+```ts
+import {
+  Animated, MotionPresence, withMotion, useMotion,
+  MotionModal, MotionDrawer, MotionCard, MotionToast,
+  stagger, PRESETS, DURATIONS,
+} from "veloria-ui/motion";
+```
+
+---
+
+#### Architecture — 9 files, one entry point
+
+| File | Purpose |
+|------|---------|
+| `types.ts` | All TypeScript types — `MotionPreset`, `MotionConfig`, `MotionProps` |
+| `presets.ts` | 16 named presets as WAAPI keyframe arrays. Each preset < 200 bytes. |
+| `engine.ts` | Core runner — resolves config, checks `prefers-reduced-motion`, runs `element.animate()`, handles abort/cancel |
+| `useMotion.ts` | React hook — attach enter/exit to a ref, tracks visible state, fires `onExitComplete` |
+| `Animated.tsx` | `<Animated show motion>` — conditional element with animated enter/exit |
+| `MotionPresence.tsx` | `<MotionPresence motion>` — manages enter/exit for children that mount/unmount |
+| `withMotion.ts` | HOC — wraps any component to add a `motion` prop, watches `open` prop or runs on mount |
+| `components.tsx` | Pre-wrapped `MotionModal`, `MotionDrawer`, `MotionToast`, `MotionCard`, etc. |
+| `index.ts` | Single barrel export |
+
+---
+
+#### 16 animation presets
+
+| Preset | Description |
+|--------|-------------|
+| `fade` | Simple opacity fade |
+| `fade-up` | Fade in from below |
+| `fade-down` | Fade in from above |
+| `fade-left` | Fade in from the right |
+| `fade-right` | Fade in from the left |
+| `fade-scale` | Fade + scale from 95% |
+| `slide-up` | Translate from 100% below, no fade |
+| `slide-down` | Translate from 100% above |
+| `slide-left` | Translate from 100% right |
+| `slide-right` | Translate from 100% left |
+| `zoom` | Scale from 50% with fade |
+| `zoom-out` | Scale from 110% with fade |
+| `flip` | 3D Y-axis perspective flip |
+| `flip-x` | 3D X-axis perspective flip |
+| `bounce` | Elastic entrance with spring easing overshoot |
+| `none` | No animation (useful for `prefers-reduced-motion` overrides) |
+
+---
+
+#### `prefers-reduced-motion` — automatic
+
+The engine checks `window.matchMedia("(prefers-reduced-motion: reduce)")` before every animation. When the user has requested reduced motion:
+
+- All keyframe animations are skipped entirely
+- Elements are made immediately visible/hidden instead
+- No JavaScript timing or RAF overhead
+- SSR-safe (returns `false` on the server)
+
+---
+
+#### Pre-wrapped components
+
+Ready-to-use `Motion*` variants of the most common Veloria UI components. Import and use as drop-in replacements — the `motion` prop is the only addition:
+
+```tsx
+import {
+  MotionModal, MotionDrawer, MotionSheet, MotionDialog,
+  MotionPopover, MotionHoverCard,
+  MotionToast, MotionSnackbar, MotionBannerAlert,
+  MotionCard, MotionAlert,
+} from "veloria-ui/motion";
+```
+
+All wrappers are lazy — unused ones are fully tree-shaken from your bundle.
+
+---
+
+#### `<Animated>` — conditional presence
+
+```tsx
+import { Animated } from "veloria-ui/motion";
+
+// Shorthand preset
+<Animated show={isVisible} motion="fade-up">
+  <p>Animates in and out</p>
+</Animated>
+
+// Full config
+<Animated show={isVisible} motion={{ preset: "fade-scale", duration: 300, delay: 100 }}>
+  <Card>Delayed entrance</Card>
+</Animated>
+
+// keepMounted — stays in DOM, just hidden
+<Animated show={isVisible} motion="fade" keepMounted>
+  <ExpensivePanel />
+</Animated>
+```
+
+---
+
+#### `<MotionPresence>` — unmount with exit animation
+
+```tsx
+import { MotionPresence } from "veloria-ui/motion";
+
+<MotionPresence motion="zoom" onExitComplete={() => console.log("gone")}>
+  {isOpen && <Panel key="panel" />}
+</MotionPresence>
+```
+
+The child must have a stable `key` prop. When the child is removed from the tree, `MotionPresence` plays its exit animation before removing it from the DOM.
+
+---
+
+#### `withMotion()` — HOC for your local components
+
+```tsx
+import { withMotion } from "veloria-ui/motion";
+import { Modal } from "@/components/ui/modal";  // your local copy
+
+const MotionModal = withMotion(Modal, { visibleProp: "open" });
+
+<MotionModal motion="fade-scale" open={isOpen} onOpenChange={setOpen} title="Hello" />
+```
+
+`withMotion` watches the `visibleProp` (default `"open"`) and plays enter/exit when it changes. For non-overlay components, pass `{ visibleProp: null }` to animate only on mount.
+
+---
+
+#### `stagger()` — staggered list animations
+
+```tsx
+import { Animated, stagger } from "veloria-ui/motion";
+
+{items.map((item, i) => (
+  <Animated key={item.id} motion={{ preset: "fade-up", delay: stagger(i, 60) }}>
+    <Card>{item.name}</Card>
+  </Animated>
+))}
+// item 0: delay 0ms, item 1: delay 60ms, item 2: delay 120ms…
+```
+
+---
+
+#### `useMotion()` — hook for custom elements
+
+```tsx
+import { useMotion } from "veloria-ui/motion";
+
+function MyPanel({ show }: { show: boolean }) {
+  const { ref, isVisible } = useMotion({
+    show,
+    motion: "slide-up",
+    onExitComplete: () => console.log("exit done"),
+  });
+
+  if (!isVisible) return null;
+
+  return <div ref={ref as React.RefObject<HTMLDivElement>}>Content</div>;
+}
+```
+
+---
+
+#### Imperative API
+
+```tsx
+import { animate, resolveConfig } from "veloria-ui/motion";
+
+// Run an animation directly on a DOM element — no React required
+const config = resolveConfig("slide-up");
+await animate({ el: document.getElementById("my-div")!, config, phase: "enter" });
+```
+
+---
+
+#### `tsup.config.ts` — new motion entry
+
+A dedicated tsup entry `{ motion: "src/motion/index.ts" }` produces `dist/motion.mjs` and `dist/motion.js`. The entry is completely separate from the main bundle so projects that don't use it pay zero cost.
+
+---
+
+#### `package.json` — new `./motion` export
+
+```json
+"./motion": {
+  "types":   "./dist/motion.d.ts",
+  "import":  "./dist/motion.mjs",
+  "require": "./dist/motion.js"
+}
+```
+
+No new `dependencies` or `peerDependencies` added — the motion system has zero runtime dependencies beyond React.
+
 ### CLI — Three major UX enhancements
 
 ---

@@ -1,6 +1,6 @@
 # Veloria UI — Documentation
 
-> Version 0.1.8 · 2026-03-17
+> Version 0.1.9 · 2026-03-17
 > by [JohnDev19](https://github.com/JohnDev19) · [ui-veloria.vercel.app](https://ui-veloria.vercel.app/)
 
 ---
@@ -11,22 +11,34 @@
 2. [Installation](#installation)
 3. [Setup](#setup)
 4. [React Hook Form Adapter](#react-hook-form-adapter)
-5. [CLI Reference](#cli-reference)
+5. [Motion System](#motion-system)
+   - [Quick start](#quick-start)
+   - [Presets](#presets)
+   - [Animated](#animated)
+   - [MotionPresence](#motionpresence)
+   - [withMotion](#withmotion)
+   - [useMotion](#usemotion)
+   - [Pre-wrapped components](#pre-wrapped-components)
+   - [Stagger](#stagger)
+   - [Imperative API](#imperative-api)
+   - [MotionConfig reference](#motionconfig-reference)
+   - [prefers-reduced-motion](#prefers-reduced-motion)
+6. [CLI Reference](#cli-reference)
    - [init](#init)
    - [add](#add)
    - [remove](#remove)
    - [list](#list)
    - [diff](#diff)
    - [upgrade](#upgrade)
-6. [Component Categories](#component-categories)
-7. [Theming & Design Tokens](#theming--design-tokens)
-8. [Dark Mode](#dark-mode)
-9. [Hooks Reference](#hooks-reference)
-10. [TypeScript](#typescript)
-11. [Accessibility](#accessibility)
-12. [Framework Guides](#framework-guides)
-13. [Contributing](#contributing)
-14. [Changelog](#changelog)
+7. [Component Categories](#component-categories)
+8. [Theming & Design Tokens](#theming--design-tokens)
+9. [Dark Mode](#dark-mode)
+10. [Hooks Reference](#hooks-reference)
+11. [TypeScript](#typescript)
+12. [Accessibility](#accessibility)
+13. [Framework Guides](#framework-guides)
+14. [Contributing](#contributing)
+15. [Changelog](#changelog)
 
 ---
 
@@ -37,40 +49,25 @@ Veloria UI is a copy-paste React component library built for teams that want to 
 **What makes Veloria UI different:**
 
 - **You own the code.** `veloria-ui add button` copies source into `components/ui/button/index.tsx`. Git-track it, fork it, delete it.
-- **Interactive picker.** `veloria-ui add` with no args opens a two-step category → component browser so you never have to guess a component name.
-- **`veloria-ui remove`** — cleanly uninstalls components, warns about dependents, and updates `veloria.lock.json`.
-- **Dependency graph.** Every `add` shows a full tree of what will be installed — components, auto-pulled registry deps, and npm packages — before anything is written.
-- **`veloria-ui diff`** — the first component library with a native terminal diff against upstream. See exactly what changed without leaving your terminal.
-- **`veloria-ui upgrade`** — three-state staleness detection keeps your components in sync with upstream without clobbering your local edits.
-- **`veloria-ui/rhf`** — a zero-boilerplate React Hook Form adapter sub-path. Drop-in `Controller` wrappers for every form component.
-- **No runtime dependency on the library** after you've added a component. The copied file is self-contained.
-- **122 components** across 10 categories, with Radix primitives, ARIA attributes, keyboard navigation, and full dark mode out of the box.
+- **`veloria-ui/motion`** — zero-dependency animation system built on the Web Animations API. No Framer Motion, no GSAP. 16 presets. `prefers-reduced-motion` aware.
+- **Interactive picker.** `veloria-ui add` with no args opens a two-step category → component browser.
+- **`veloria-ui remove`** — cleanly uninstalls components, warns about dependents, updates `veloria.lock.json`.
+- **`veloria-ui diff`** — native terminal diff against upstream. See exactly what changed without leaving your terminal.
+- **`veloria-ui upgrade`** — three-state staleness detection keeps components in sync without clobbering local edits.
+- **`veloria-ui/rhf`** — zero-boilerplate React Hook Form adapter. Drop-in `Controller` wrappers for every form component.
+- **No runtime dependency** after you've added a component. The copied file is self-contained.
+- **122 components** across 10 categories.
 
 ---
 
 ## Installation
 
 ```bash
-# npm
 npm install veloria-ui
-
-# pnpm
-pnpm add veloria-ui
-
-# bun
-bun add veloria-ui
-
-# yarn
-yarn add veloria-ui
+# pnpm add veloria-ui
+# bun add veloria-ui
+# yarn add veloria-ui
 ```
-
-**Peer dependencies** (install alongside veloria-ui):
-
-```bash
-npm install react react-dom
-```
-
-All Radix UI packages are optional peer dependencies — they are only needed for the specific components that use them and are installed automatically by `veloria-ui add`.
 
 ---
 
@@ -79,11 +76,9 @@ All Radix UI packages are optional peer dependencies — they are only needed fo
 ### 1. Import the stylesheet
 
 ```tsx
-// app/layout.tsx  (Next.js App Router)
+// app/layout.tsx
 import "veloria-ui/styles";
 ```
-
-The stylesheet defines all CSS custom properties (design tokens) for both light and dark mode. It must be imported once at the root of your app.
 
 ### 2. Add the Tailwind plugin
 
@@ -101,15 +96,12 @@ export default {
 ### 3. Wrap your app
 
 ```tsx
-// app/layout.tsx
 import { VeloriaProvider } from "veloria-ui/provider";
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-        <VeloriaProvider>{children}</VeloriaProvider>
-      </body>
+      <body><VeloriaProvider>{children}</VeloriaProvider></body>
     </html>
   );
 }
@@ -120,37 +112,30 @@ export default function RootLayout({ children }) {
 ```tsx
 import { Button, Card, CardContent, Input, Badge } from "veloria-ui";
 
-export default function Page() {
-  return (
-    <Card>
-      <CardContent className="flex flex-col gap-4 p-6">
-        <Badge variant="soft" color="success">New</Badge>
-        <Input placeholder="Email address" type="email" />
-        <Button variant="solid" size="lg">Get started</Button>
-      </CardContent>
-    </Card>
-  );
-}
+<Card>
+  <CardContent className="flex flex-col gap-4 p-6">
+    <Badge variant="soft" color="success">New</Badge>
+    <Input placeholder="Email address" type="email" />
+    <Button variant="solid" size="lg">Get started</Button>
+  </CardContent>
+</Card>
 ```
 
 ---
 
 ## React Hook Form Adapter
 
-Import from `veloria-ui/rhf` for zero-boilerplate RHF-integrated form components. Requires `react-hook-form ^7.0.0`.
+Import from `veloria-ui/rhf`. Requires `react-hook-form ^7.0.0`.
 
 ```tsx
+import { RhfInput, RhfSelect, RhfCheckbox } from "veloria-ui/rhf";
 import { useForm } from "react-hook-form";
-import { RhfInput, RhfSelect, RhfCheckbox, RhfSlider } from "veloria-ui/rhf";
 
-const { control, handleSubmit } = useForm<{
-  email: string; role: string; agree: boolean; volume: number;
-}>();
+const { control, handleSubmit } = useForm<{ email: string; role: string; agree: boolean }>();
 
 <form onSubmit={handleSubmit(onSubmit)}>
   <RhfInput    name="email"  control={control} label="Email" type="email" />
   <RhfSelect   name="role"   control={control} label="Role"  options={roles} />
-  <RhfSlider   name="volume" control={control} label="Volume" min={0} max={100} showValue />
   <RhfCheckbox name="agree"  control={control} label="I agree to the terms" />
   <Button type="submit">Submit</Button>
 </form>
@@ -158,13 +143,325 @@ const { control, handleSubmit } = useForm<{
 
 All 11 wrappers: `RhfInput`, `RhfTextArea`, `RhfSelect`, `RhfCheckbox`, `RhfSwitch`, `RhfRadioGroup`, `RhfSlider`, `RhfCombobox`, `RhfMultiSelect`, `RhfRatingInput`, `RhfOTPInput`.
 
-Each wrapper automatically handles `invalid` state, renders `<FormError>` with the validation message, and forwards all original visual props unchanged.
+---
+
+## Motion System
+
+`veloria-ui/motion` is a thin animation layer built on the **Web Animations API**. Zero dependencies — no Framer Motion, no GSAP. Ships inside the `veloria-ui` package, tree-shaken out if unused.
+
+### Quick start
+
+```tsx
+import {
+  Animated,
+  MotionModal,
+  MotionCard,
+  MotionDrawer,
+} from "veloria-ui/motion";
+
+// Pre-wrapped component — drop-in replacement with motion prop
+<MotionModal motion="fade-scale" open={isOpen} onOpenChange={setOpen} title="Hello" />
+<MotionDrawer motion="slide-left" open={isOpen} onOpenChange={setOpen} side="left" />
+
+// Conditional element with animated enter/exit
+<Animated show={isVisible} motion="fade-up">
+  <p>Animates in and out</p>
+</Animated>
+
+// Mount-only animation (no show prop = always visible, runs on mount)
+<MotionCard motion={{ preset: "fade-up", delay: 150 }}>
+  Content
+</MotionCard>
+```
+
+---
+
+### Presets
+
+Pass any preset name as a string shorthand to `motion=`.
+
+| Preset | Description |
+|--------|-------------|
+| `"fade"` | Simple opacity fade |
+| `"fade-up"` | Fade in from below |
+| `"fade-down"` | Fade in from above |
+| `"fade-left"` | Fade in from the right |
+| `"fade-right"` | Fade in from the left |
+| `"fade-scale"` | Fade + scale from 95% → 100% |
+| `"slide-up"` | Translate from 100% below, no fade |
+| `"slide-down"` | Translate from 100% above |
+| `"slide-left"` | Translate from 100% right |
+| `"slide-right"` | Translate from 100% left |
+| `"zoom"` | Scale from 50% with fade |
+| `"zoom-out"` | Scale from 110% with fade |
+| `"flip"` | 3D Y-axis perspective flip |
+| `"flip-x"` | 3D X-axis perspective flip |
+| `"bounce"` | Elastic entrance with spring easing |
+| `"none"` | No animation (useful for accessible overrides) |
+
+---
+
+### MotionConfig reference
+
+For fine-grained control, pass a `MotionConfig` object instead of a preset string:
+
+```tsx
+<Animated
+  show={isVisible}
+  motion={{
+    preset:      "fade-up",   // MotionPreset — default "fade"
+    duration:    300,          // ms — default 220
+    delay:       150,          // ms — default 0
+    easing:      "ease-out",   // or "spring", "bounce", custom cubic-bezier
+    distance:    24,           // px — used by translate-based presets, default 16
+    exitReverse: true,         // reverse enter frames for exit, default true
+    // Override frames entirely:
+    enterKeyframes: [{ opacity: 0 }, { opacity: 1 }],
+    exitKeyframes:  [{ opacity: 1 }, { opacity: 0 }],
+  }}
+>
+  content
+</Animated>
+```
+
+**Available easings:** `"ease"`, `"ease-in"`, `"ease-out"`, `"ease-in-out"`, `"spring"` (cubic-bezier overshoot), `"bounce"` (elastic), `"linear"`, or any custom `"cubic-bezier(…)"` string.
+
+**Duration constants** (importable from `veloria-ui/motion`):
+
+```ts
+import { DURATIONS } from "veloria-ui/motion";
+
+DURATIONS.instant  // 120ms
+DURATIONS.fast     // 220ms  ← default
+DURATIONS.normal   // 300ms
+DURATIONS.slow     // 450ms
+DURATIONS.dramatic // 600ms
+```
+
+---
+
+### `<Animated>`
+
+Wraps any HTML element with animated enter/exit. The element is removed from the DOM after the exit animation completes (unless `keepMounted` is set).
+
+```tsx
+import { Animated } from "veloria-ui/motion";
+
+<Animated
+  show={isVisible}           // toggle enter/exit
+  motion="fade-up"           // preset or MotionConfig
+  as="section"               // HTML element, default "div"
+  keepMounted={false}        // keep in DOM after exit, default false
+  className="my-class"
+>
+  {children}
+</Animated>
+```
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `show` | `boolean` | `true` | Controls visibility and triggers enter/exit |
+| `motion` | `MotionPreset \| MotionConfig` | — | Animation configuration |
+| `as` | `React.ElementType` | `"div"` | HTML element to render |
+| `keepMounted` | `boolean` | `false` | Stay in DOM after exit (hidden) |
+
+---
+
+### `<MotionPresence>`
+
+Manages enter/exit for children that mount and unmount. When the child is removed from the React tree, `MotionPresence` plays its exit animation before removing it from the DOM — identical to Framer Motion's `AnimatePresence`.
+
+```tsx
+import { MotionPresence } from "veloria-ui/motion";
+
+<MotionPresence
+  motion="zoom"
+  onExitComplete={() => console.log("fully gone")}
+>
+  {isOpen && <Panel key="panel" />}
+</MotionPresence>
+```
+
+The child **must** have a stable `key` prop. The child must accept a `ref` (any native HTML element or a `React.forwardRef` component).
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `children` | `React.ReactElement` | Single child with a stable `key` |
+| `motion` | `MotionPreset \| MotionConfig` | Animation for this child |
+| `onExitComplete` | `() => void` | Called after exit animation finishes |
+
+---
+
+### `withMotion()`
+
+Higher-order component that wraps any component (including your locally-copied Veloria UI components) and adds a `motion` prop.
+
+```tsx
+import { withMotion } from "veloria-ui/motion";
+import { Modal } from "@/components/ui/modal";   // your local copy
+
+const MotionModal = withMotion(Modal, {
+  visibleProp: "open",  // watch this prop for enter/exit (default: "open")
+});
+
+<MotionModal motion="fade-scale" open={isOpen} onOpenChange={setOpen} title="Hello" />
+```
+
+For non-overlay components (no `open` prop), pass `{ visibleProp: null }` — the animation runs once on mount:
+
+```tsx
+const MotionCard = withMotion(Card, { visibleProp: null });
+
+<MotionCard motion={{ preset: "fade-up", delay: 200 }}>
+  Animates on mount only
+</MotionCard>
+```
+
+**Zero overhead** — if you don't pass `motion`, the component renders with no wrapper or animation cost.
+
+---
+
+### `useMotion()`
+
+Low-level React hook. Attach animated enter/exit to any DOM element ref you control.
+
+```tsx
+import { useMotion } from "veloria-ui/motion";
+
+function MyPanel({ show }: { show: boolean }) {
+  const { ref, isVisible } = useMotion({
+    show,
+    motion: "slide-up",
+    onExitComplete: () => console.log("exited"),
+    animateOnMount: true,  // run enter on first mount, default true
+  });
+
+  if (!isVisible) return null;
+
+  return (
+    <div ref={ref as React.RefObject<HTMLDivElement>}>
+      Content
+    </div>
+  );
+}
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `show` | `boolean` | `true` | Toggle enter/exit |
+| `motion` | `MotionPreset \| MotionConfig` | — | Animation config |
+| `onExitComplete` | `() => void` | — | Called after exit finishes |
+| `animateOnMount` | `boolean` | `true` | Run enter on initial mount |
+
+---
+
+### Pre-wrapped components
+
+Ready-to-use `Motion*` variants. Import and use as drop-in replacements. All accept the original component's props plus `motion`.
+
+```tsx
+import {
+  // Overlay — open/close animated
+  MotionModal, MotionDrawer, MotionSheet, MotionDialog,
+  MotionPopover, MotionHoverCard,
+
+  // Feedback — open driven
+  MotionToast, MotionSnackbar, MotionBannerAlert,
+
+  // Data Display — mount triggered
+  MotionCard, MotionAlert,
+} from "veloria-ui/motion";
+```
+
+**Example — recommended presets per component:**
+
+```tsx
+// Modal — scale from centre
+<MotionModal motion="fade-scale" open={open} onOpenChange={setOpen} title="Confirm" />
+
+// Drawer from left
+<MotionDrawer motion="slide-right" open={open} onOpenChange={setOpen} side="left" />
+
+// Drawer from right (default side)
+<MotionDrawer motion="slide-left" open={open} onOpenChange={setOpen} />
+
+// Drawer from bottom
+<MotionDrawer motion="slide-up" open={open} onOpenChange={setOpen} side="bottom" />
+
+// Toast — slide from corner
+<MotionToast motion="fade-up" open={open} onOpenChange={setOpen} />
+
+// Card — reveal on page load
+<MotionCard motion={{ preset: "fade-up", delay: 150, duration: 300 }}>
+  Dashboard card
+</MotionCard>
+```
+
+---
+
+### Stagger
+
+Animate list items one after another with increasing delays:
+
+```tsx
+import { Animated, stagger } from "veloria-ui/motion";
+
+// stagger(index, stepMs, baseDelayMs)
+{items.map((item, i) => (
+  <Animated
+    key={item.id}
+    motion={{ preset: "fade-up", delay: stagger(i, 60) }}
+  >
+    <Card>{item.name}</Card>
+  </Animated>
+))}
+// item 0 → 0ms, item 1 → 60ms, item 2 → 120ms…
+```
+
+---
+
+### Imperative API
+
+Run animations directly on DOM elements without React:
+
+```tsx
+import { animate, resolveConfig } from "veloria-ui/motion";
+
+const config = resolveConfig("slide-up");
+// or: resolveConfig({ preset: "slide-up", duration: 400 })
+
+await animate({
+  el:     document.getElementById("my-panel")!,
+  config,
+  phase:  "enter",   // or "exit"
+  signal: abortController.signal,  // optional, to cancel mid-animation
+});
+```
+
+---
+
+### `prefers-reduced-motion`
+
+The motion system automatically respects the OS accessibility setting. When `prefers-reduced-motion: reduce` is detected:
+
+- All WAAPI keyframe animations are **skipped entirely**
+- Elements become immediately visible/hidden with no transition
+- No RAF overhead, no timing delays
+- SSR safe — returns `false` on the server
+
+You can also read this yourself:
+
+```tsx
+import { prefersReducedMotion } from "veloria-ui/motion";
+
+if (!prefersReducedMotion()) {
+  // run custom animation
+}
+```
 
 ---
 
 ## CLI Reference
-
-veloria-ui ships a CLI that copies components straight into your project — shadcn-style. You own the code.
 
 ```bash
 npx veloria-ui init                  # project setup wizard
@@ -174,26 +471,22 @@ npx veloria-ui remove button         # remove an installed component
 npx veloria-ui list                  # browse all components
 npx veloria-ui list --category forms # filter by category
 npx veloria-ui diff button           # compare local vs upstream
-npx veloria-ui upgrade               # check all components for upstream changes
-npx veloria-ui upgrade --all         # upgrade everything non-interactively
+npx veloria-ui upgrade               # check all for upstream changes
+npx veloria-ui upgrade --all         # upgrade everything
 ```
 
 ---
 
 ### `init`
 
-```bash
-npx veloria-ui init [options]
-```
-
-Sets up veloria-ui in your project. Writes `veloria.config.json` and `lib/utils.ts`. Detects Next.js automatically.
+Sets up veloria-ui in your project. Writes `veloria.config.json` and `lib/utils.ts`.
 
 | Option | Description |
 |--------|-------------|
 | `--typescript` | Use TypeScript (default: `true`) |
 | `--tailwind` | Configure Tailwind (default: `true`) |
 | `--no-install` | Skip dependency install |
-| `-y, --yes` | Skip all prompts, use defaults |
+| `-y, --yes` | Skip all prompts |
 
 ---
 
@@ -203,31 +496,9 @@ Sets up veloria-ui in your project. Writes `veloria.config.json` and `lib/utils.
 npx veloria-ui add [components...] [options]
 ```
 
-Copies one or more components into your project. Registry dependencies are resolved and added automatically. Records the upstream hash in `veloria.lock.json`.
+When called with no names, launches an **interactive two-step picker**: category multiselect → per-category component multiselect. Already-installed components are pre-ticked with `✓`. Components with `registryDeps` show `[+deps]`.
 
-**When called with no component names, opens an interactive two-step picker:**
-
-```
-? Which categories do you want to browse?
-  ❯ ◉ Basic              2/11 installed
-    ◯ Forms              0/14 installed
-    ◉ Feedback           1/16 installed
-```
-
-Then per-category:
-
-```
-? Basic components
-  ❯ ✓  button        Solid, outline, ghost, soft, link, classic variants…
-     ◯  badge         Compact label — solid, outline, soft, classic…
-     ◯  avatar-group  Stacked avatars with overflow count  [+deps]
-```
-
-Already-installed components are pre-ticked with `✓`. Components that pull registry deps show `[+deps]`.
-
-**Dependency graph display**
-
-Every `add` prints a full tree before confirmation so you can see exactly what will be installed:
+**Dependency graph** is printed before confirmation on every `add`:
 
 ```
   Adding 2 components (1 selected + 1 auto)
@@ -240,40 +511,13 @@ Every `add` prints a full tree before confirmation so you can see exactly what w
   └── @radix-ui/react-dialog
 ```
 
-**Source resolution**
-
-The CLI resolves component source in this order:
-
-1. `node_modules/veloria-ui/src/components/<category>/` — works offline and on Replit with no network needed.
-2. `https://raw.githubusercontent.com/JohnDev19/Veloria-UI/master/src/components/` — fallback when node_modules src is unavailable.
-
-All `atlas-` CSS class prefixes are automatically renamed to `veloria-` on copy.
-
 | Option | Description |
 |--------|-------------|
-| `-y, --yes` | Skip confirmation prompts |
+| `-y, --yes` | Skip confirmation |
 | `--no-install` | Skip peer dep install |
 | `-p, --path <dir>` | Override destination directory |
 | `--force` | Overwrite existing local files |
-| `--dry-run` | Show what would be added without writing anything |
-
-```bash
-# Interactive picker
-npx veloria-ui add
-
-# Add specific components
-npx veloria-ui add button
-npx veloria-ui add card modal drawer toast
-
-# Custom output path
-npx veloria-ui add select --path src/design-system
-
-# Preview without writing
-npx veloria-ui add command-bar --dry-run
-
-# Overwrite existing copies
-npx veloria-ui add button --force
-```
+| `--dry-run` | Show what would be added without writing |
 
 ---
 
@@ -281,390 +525,110 @@ npx veloria-ui add button --force
 
 ```bash
 npx veloria-ui remove <components...> [options]
-npx veloria-ui rm <components...>   # alias
+npx veloria-ui rm <components...>
 ```
 
-Removes one or more installed components from your project. Deletes the component file, removes the directory if it becomes empty, and cleans up `veloria.lock.json`.
-
-**Dependent check**
-
-Before removing, the CLI scans your other installed components for `registryDeps` that point to what you are removing. If any are found, it warns and prompts:
-
-```
-  ⚠  The following installed components depend on what you're removing:
-
-    avatar-group   →  depends on  avatar
-    command-palette  →  depends on  command-dialog
-
-  Remove anyway? (dependents may break)  › No
-```
-
-Pass `--force` to skip this check.
-
-**File preview**
-
-Shows exactly what will be deleted before asking for confirmation:
-
-```
-  Files to be removed:
-    components/ui/button/index.tsx
-    components/ui/button/  (directory)
-```
+Removes components, warns about dependents, cleans `veloria.lock.json`.
 
 | Option | Description |
 |--------|-------------|
-| `-y, --yes` | Skip confirmation prompt |
+| `-y, --yes` | Skip confirmation |
 | `--force` | Remove even if other components depend on it |
-
-```bash
-# Remove a single component
-npx veloria-ui remove button
-
-# Remove multiple at once
-npx veloria-ui remove button card modal
-
-# Remove without confirmation prompt
-npx veloria-ui remove skeleton --yes
-
-# Remove even if other components depend on it
-npx veloria-ui remove avatar --force
-
-# Using the alias
-npx veloria-ui rm modal
-```
 
 ---
 
 ### `list`
 
 ```bash
-npx veloria-ui list [options]
-npx veloria-ui ls [options]
+npx veloria-ui list [--category <name>]
+npx veloria-ui ls
 ```
 
-Lists all available components with their category and description.
-
-| Option | Description |
-|--------|-------------|
-| `-c, --category <category>` | Filter by category name |
-
-**Available categories:** `basic`, `layout`, `navigation`, `forms`, `advanced-forms`, `data-display`, `feedback`, `overlay`, `media`, `utility`.
-
-```bash
-npx veloria-ui list
-npx veloria-ui list --category forms
-npx veloria-ui list --category data-display
-```
+Lists all available components by category. Filter: `basic`, `layout`, `navigation`, `forms`, `advanced-forms`, `data-display`, `feedback`, `overlay`, `media`, `utility`.
 
 ---
 
 ### `diff`
 
 ```bash
-npx veloria-ui diff <component> [options]
+npx veloria-ui diff <component> [--context <n>] [--json]
 ```
 
-Compares your local copy of a component to the latest upstream source using a Myers diff algorithm. Produces unified-style, colour-coded terminal output.
-
-Source is resolved from `node_modules` first, falling back to the GitHub `master` branch.
-
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--context <n>` | Lines of context around each hunk | `3` |
-| `--json` | Machine-readable JSON output | — |
-
-```bash
-npx veloria-ui diff button
-npx veloria-ui diff modal --context 6
-npx veloria-ui diff input --json
-```
-
-**Terminal output example:**
-
-```
-  diff  button
-  local     components/ui/button/index.tsx
-  upstream  node_modules
-
-  +2 additions  -1 deletion
-
-    13  -    "inline-flex items-center justify-center rounded-md",
-    14  +    "inline-flex items-center justify-center gap-2 rounded-md",
-   ···
-    31  +    loading: "opacity-70 cursor-wait",
-
-  To update your local copy, run: npx veloria-ui upgrade button
-```
-
-**JSON output shape:**
-
-```json
-{
-  "component": "button",
-  "localPath": "components/ui/button/index.tsx",
-  "upstreamUrl": "node_modules",
-  "summary": { "added": 2, "removed": 1, "changed": 3 },
-  "diff": [
-    { "type": "removed", "lineNo": { "local": 13 }, "content": "  ..." },
-    { "type": "added",   "lineNo": { "upstream": 13 }, "content": "  ..." }
-  ]
-}
-```
+Compares your local copy to upstream using a Myers diff algorithm. Reads from `node_modules` first, falls back to GitHub `master` branch.
 
 ---
 
 ### `upgrade`
 
 ```bash
-npx veloria-ui upgrade [component] [options]
-npx veloria-ui up [component] [options]   # alias
+npx veloria-ui upgrade [component] [--check] [--all] [--force] [--json]
+npx veloria-ui up
 ```
 
-Checks installed components against upstream and upgrades those that have changed. Uses `veloria.lock.json` for three-state staleness detection.
-
-**Three-state staleness model:**
-
-| State | Meaning |
-|-------|---------|
-| `up-to-date` | Upstream hash matches hash recorded at install time |
-| `upstream-changed` | Upstream changed, local unmodified — safe to auto-upgrade |
-| `diverged` | Both upstream and your local file changed — warned before overwriting |
-| `no-lock` | Component pre-dates the lock file; falls back to raw content comparison |
-
-| Flag | Description |
-|------|-------------|
-| `[component]` | Upgrade a single named component |
-| `-y, --yes` / `--all` | Upgrade all outdated non-interactively (skips diverged unless `--force`) |
-| `--check` | Dry-run — report status only, make no changes |
-| `--force` | Overwrite even diverged (locally modified) components |
-| `--json` | Machine-readable JSON status report |
-
-```bash
-# Check what's outdated (no changes made)
-npx veloria-ui upgrade --check
-
-# Interactive upgrade — prompts per component
-npx veloria-ui upgrade
-
-# Upgrade a single component
-npx veloria-ui upgrade button
-
-# Upgrade everything non-interactively
-npx veloria-ui upgrade --all
-
-# CI status report (exits 0 whether outdated or not)
-npx veloria-ui upgrade --check --json
-```
-
-**`veloria.lock.json`** — written by `add` and updated by `upgrade`. Records the SHA-256 of each component's upstream source at install time, the upstream URL, and timestamps. Commit this file — it's what makes three-state upgrade detection possible.
+Three-state model: `up-to-date`, `upstream-changed` (safe auto-upgrade), `diverged` (both changed — warned). Powered by `veloria.lock.json`.
 
 ---
 
 ## Component Categories
 
-### Basic (11 components)
+### Basic (11) · Layout (10) · Navigation (10)
 
-| Component | Description |
-|-----------|-------------|
-| `button` | Solid, outline, ghost, soft, link, classic, danger variants. Loading state, icon slots. |
-| `icon-button` | Square or circular icon-only button. |
-| `link` | Anchor with external link indicator and underline control. |
-| `badge` | Compact label — solid, outline, soft, classic, neutral variants. |
-| `avatar` | Image with fallback initials, status ring, 6 sizes. |
-| `avatar-group` | Stacked avatars with overflow count. |
-| `divider` | Horizontal/vertical separator with optional center label. |
-| `tag` | Closable colored tag with icon slot. |
-| `chip` | Toggleable chip with avatar/icon and remove button. |
-| `tooltip` | Radix tooltip, all four sides, configurable delay. |
-| `classic-variant` | Classic beveled-edge style for Button, IconButton, Badge, Tag, Chip, Card. |
+See the full component tables in the previous docs version — all counts and names unchanged from v0.1.8.
 
-### Layout (10 components)
+### Forms (14)
 
-| Component | Description |
-|-----------|-------------|
-| `container` | Responsive max-width wrapper with padding control. |
-| `stack` | Flex column/row with gap, align, justify, divider. |
-| `grid` | CSS Grid with column/row/gap config. |
-| `flex` | Flex with full directional control. |
-| `section` | Semantic section with vertical padding presets. |
-| `spacer` | Invisible spacing element. |
-| `aspect-ratio` | Radix aspect-ratio container. |
-| `center` | Flex centering helper. |
-| `scroll-area` | Custom scrollbar via Radix ScrollArea. |
-| `masonry` | CSS multi-column masonry grid. |
+`input`, `textarea`, `select`, `checkbox`, `radio-group`, `switch`, `slider`, `range-slider`, `date-picker`, `time-picker`, `number-input`, `avatar-upload`, `date-range-picker`, `form-field`
 
-### Navigation (10 components)
+### Advanced Forms (13)
 
-| Component | Description |
-|-----------|-------------|
-| `navbar` | Sticky, glass-blur top bar. |
-| `sidebar` | Collapsible side nav with width transition. |
-| `menu` | Vertical nav menu with active/disabled states. |
-| `dropdown-menu` | Full Radix Dropdown with all sub-primitives. |
-| `breadcrumb` | Accessible trail with custom separator. |
-| `pagination` | Page numbers with ellipsis and prev/next. |
-| `tabs` | Line, pills, enclosed variants. Radix powered. |
-| `command-palette` | ⌘K command palette. |
-| `navigation-menu` | Radix Navigation Menu for complex navbars. |
-| `stepper` | Horizontal/vertical multi-step indicator. |
+`file-upload`, `otp-input`, `color-picker`, `search-input`, `password-input`, `combobox`, `multi-select`, `phone-input`, `tag-input`, `currency-input`, `rating-input`, `rich-text-editor`, `multi-step-form`
 
-### Forms (14 components)
+### Data Display (22)
 
-| Component | Description |
-|-----------|-------------|
-| `input` | Left/right icon slots, sizes, error state. |
-| `textarea` | Multi-line input with resize control. |
-| `select` | Full Radix Select — animated dropdown. |
-| `checkbox` | With label, description, error state. |
-| `radio-group` | Per-option labels and descriptions. |
-| `switch` | Three sizes, label, description. |
-| `slider` | Single-thumb range slider. |
-| `range-slider` | Dual-thumb slider. |
-| `date-picker` | Native date input wrapper. |
-| `time-picker` | Native time input wrapper. |
-| `number-input` | Stepper with −/+ buttons, min/max/step clamp, keyboard support. |
-| `avatar-upload` | Avatar circle with hover camera overlay, instant preview, size validation. |
-| `date-range-picker` | Two-calendar date range selector with hover preview and keyboard nav. |
-| `form-field` | Label + input + error wrapper. |
+`card`, `table`, `data-table`, `data-grid`, `list`, `list-item`, `statistic`, `timeline`, `calendar`, `code-block`, `chart`, `stats-card`, `tree-view`, `json-viewer`, `heatmap`, `kanban-board`, `sparkline-chart`, `radial-progress-chart`, `gauge-chart`, `aurora-card`, `pricing-card`, `file-card`
 
-### Advanced Forms (13 components)
+### Feedback (16)
 
-| Component | Description |
-|-----------|-------------|
-| `file-upload` | Drag-and-drop zone with click-to-upload fallback. |
-| `otp-input` | PIN/OTP with auto-advance and paste support. |
-| `color-picker` | Swatches + hex input. |
-| `search-input` | Search with loading state and clear button. |
-| `password-input` | Password with show/hide toggle. |
-| `combobox` | Searchable single-value select. |
-| `multi-select` | Multi-value select with chips. |
-| `phone-input` | International phone number with country dial-code selector. |
-| `tag-input` | Type and press Enter to add inline tags. |
-| `currency-input` | Formatted number input with locale-aware currency symbol. |
-| `rating-input` | Star rating picker with hover state, clear button, read-only mode. |
-| `rich-text-editor` | Tiptap-based editor with toolbar, headings, lists, code blocks, links. |
-| `multi-step-form` | Compound multi-step form with per-step validation and animated transitions. |
+`alert`, `toast`, `snackbar`, `progress`, `circular-progress`, `skeleton`, `loading-spinner`, `empty-state`, `status-indicator`, `notification`, `banner-alert`, `confirm-dialog`, `floating-action-button`, `rich-tooltip`, `tour`, `step-progress`
 
-### Data Display (22 components)
+### Overlay (11)
 
-| Component | Description |
-|-----------|-------------|
-| `card` | Surface with header/content/footer slots. 6 variants. |
-| `table` | Full HTML table system. |
-| `data-table` | Sortable data table with loading and empty states. |
-| `data-grid` | Spreadsheet-grade grid — column resizing, virtualisation, inline editing. |
-| `list` | Simple, bordered, and divided lists. |
-| `list-item` | List item with icon and extra slot. |
-| `statistic` | Key metric with trend indicator. |
-| `timeline` | Vertical events with color-coded icons. |
-| `calendar` | Month picker with highlighted dates. |
-| `code-block` | Code display with copy button and line numbers. |
-| `chart` | Chart wrapper — bring your own chart library. |
-| `stats-card` | Metric card with icon, trend indicator, and loading skeleton. |
-| `tree-view` | Nested expandable tree with keyboard navigation. |
-| `json-viewer` | Collapsible syntax-highlighted JSON tree. |
-| `heatmap` | GitHub-style activity grid with value intensity scale. |
-| `kanban-board` | Drag-and-drop column board with card tagging and assignee slot. |
-| `sparkline-chart` | Zero-dep SVG inline trend line with area fill and animated draw. |
-| `radial-progress-chart` | Multi-segment animated SVG ring chart with center label and legend. |
-| `gauge-chart` | Half-circle SVG gauge with animated needle and colour zones. |
-| `aurora-card` | Dark card with mouse-reactive aurora gradient blobs and glassmorphism. |
-| `pricing-card` | Pricing tier with features list, CTA, popular badge, monthly/annual toggle. |
-| `file-card` | File attachment display with type badge, size, progress bar. |
+`modal`, `dialog`, `drawer`, `sheet`, `popover`, `hover-card`, `context-menu`, `command-dialog`, `command-bar`, `lightbox`, `image-viewer`
 
-### Feedback (16 components)
+### Media (5)
 
-| Component | Description |
-|-----------|-------------|
-| `alert` | Info/success/warning/danger with optional dismiss. |
-| `toast` | Radix Toast with all sub-primitives. |
-| `snackbar` | Positioned message with action. |
-| `progress` | Linear bar with color variants. |
-| `circular-progress` | SVG ring with indeterminate mode. |
-| `skeleton` | Pulse placeholder for text, rect, circle. |
-| `loading-spinner` | Accessible SVG spinner. |
-| `empty-state` | Icon + title + description + action. |
-| `status-indicator` | Online/offline/busy/away dot with pulse. |
-| `notification` | Notification item with avatar, timestamp, unread dot. |
-| `banner-alert` | Full-width top-of-page announcement strip with 4 variants. |
-| `confirm-dialog` | Opinionated confirmation modal with async confirm and danger variant. |
-| `floating-action-button` | FAB with expandable speed-dial actions and 3 position presets. |
-| `rich-tooltip` | Tooltip with title, description, and action slot. |
-| `tour` | Multi-step onboarding overlay with dot progress indicator. |
-| `step-progress` | Animated segmented progress bar for multi-step checkout flows. |
+`image`, `video-player`, `audio-player`, `carousel`, `gallery`
 
-### Overlay (11 components)
+### Utility (8)
 
-| Component | Description |
-|-----------|-------------|
-| `modal` | Preset dialog — sm to full size variants. |
-| `dialog` | Full Radix Dialog primitive suite. |
-| `drawer` | Slides in from any edge. |
-| `sheet` | Drawer alias. |
-| `popover` | Floating panel. |
-| `hover-card` | Rich hover preview. |
-| `context-menu` | Right-click menu. |
-| `command-dialog` | ⌘K palette. |
-| `command-bar` | Persistent Linear-style command bar with grouped actions and live search. |
-| `lightbox` | Full-screen image overlay. |
-| `image-viewer` | Lightbox alias. |
-
-### Media (5 components)
-
-| Component | Description |
-|-----------|-------------|
-| `image` | Image with fallback, aspect ratio, fit, caption. |
-| `video-player` | HTML5 video with captions/subtitles support. |
-| `audio-player` | Custom audio UI with seek bar, cover art. |
-| `carousel` | Autoplay, dots, arrows, loop, slidesPerView. |
-| `gallery` | Responsive image grid with click handler. |
-
-### Utility (8 components)
-
-| Component | Description |
-|-----------|-------------|
-| `theme-switcher` | Icon / toggle / select variants. |
-| `copy-button` | Icon or labelled copy button with success feedback. |
-| `keyboard-shortcut` | Styled `<kbd>` shortcut display. |
-| `resizable-panel` | Drag-to-resize panel with min/max constraints. |
-| `drag-drop-area` | Accessible file drop zone. |
-| `infinite-scroll` | IntersectionObserver-based load-more trigger with loader slot. |
-| `virtual-list` | Windowed list renderer for large datasets. |
-| `typewriter-text` | Cycles through strings with character-by-character typing animation. |
+`theme-switcher`, `copy-button`, `keyboard-shortcut`, `resizable-panel`, `drag-drop-area`, `infinite-scroll`, `virtual-list`, `typewriter-text`
 
 ---
 
 ## Theming & Design Tokens
 
-All tokens are CSS custom properties defined in `veloria.css` and consumed via Tailwind classes.
+All tokens are CSS custom properties in `veloria.css`, consumed via Tailwind classes.
 
 ```css
-/* Core palette */
---background       --foreground
---card             --card-foreground
---popover          --popover-foreground
---primary          --primary-foreground
---secondary        --secondary-foreground
---muted            --muted-foreground
---accent           --accent-foreground
---destructive      --destructive-foreground
---border           --input            --ring
-
-/* Semantic */
---success          --success-foreground
---warning          --warning-foreground
---info             --info-foreground
-
-/* Radius */
---radius-sm   --radius   --radius-md   --radius-lg   --radius-full
+--background   --foreground
+--card         --card-foreground
+--popover      --popover-foreground
+--primary      --primary-foreground
+--secondary    --secondary-foreground
+--muted        --muted-foreground
+--accent       --accent-foreground
+--destructive  --destructive-foreground
+--border       --input            --ring
+--success      --warning          --info
+--radius-sm    --radius           --radius-md   --radius-lg   --radius-full
 ```
 
-Override any token in your `globals.css`:
+Override in `globals.css`:
 
 ```css
 :root {
-  --primary: 262 83% 58%;           /* purple */
-  --radius: 0.25rem;                /* sharper corners */
+  --primary: 262 83% 58%;
+  --radius:  0.25rem;
 }
 ```
 
@@ -672,15 +636,10 @@ Override any token in your `globals.css`:
 
 ## Dark Mode
 
-Uses the `class` strategy — add `dark` to `<html>` and everything flips automatically.
-
 ```tsx
 import { useTheme, ThemeSwitcher } from "veloria-ui";
 
-function Header() {
-  const { theme, setTheme } = useTheme();
-  return <ThemeSwitcher value={theme} onChange={setTheme} variant="toggle" />;
-}
+<ThemeSwitcher value={theme} onChange={setTheme} variant="toggle" />
 ```
 
 ---
@@ -689,48 +648,46 @@ function Header() {
 
 | Hook | Description |
 |------|-------------|
-| `useDisclosure` | open/close state with `toggle`, `open`, `close` helpers |
-| `useMediaQuery` | reactive window media query subscription |
+| `useDisclosure` | open/close state with `toggle`, `open`, `close` |
+| `useMediaQuery` | reactive window media query |
 | `useBreakpoint` | Tailwind breakpoint helper |
-| `useClipboard` | clipboard copy with configurable timeout feedback |
-| `useLocalStorage` | persistent state synced to localStorage |
-| `useTheme` | theme switching — persists to localStorage |
-| `useDebounce` | debounced value with configurable delay |
+| `useClipboard` | copy with timeout feedback |
+| `useLocalStorage` | persistent state |
+| `useTheme` | theme switching |
+| `useDebounce` | debounced value |
 | `useOnClickOutside` | outside click detection |
-| `useKeydown` | keyboard shortcut listener with modifier support |
+| `useKeydown` | keyboard shortcut with modifier support |
 | `useMounted` | SSR-safe mount check |
 | `useToast` | programmatic toast queue |
-| `useForm` | form state and validation with touched tracking |
-| `usePagination` | pagination logic decoupled from UI, with from/to helpers |
-| `useIntersection` | IntersectionObserver wrapper with optional `once` mode |
-| `useWindowSize` | reactive window width/height, SSR-safe |
-| `useStep` | multi-step wizard state with `isFirst`, `isLast`, progress |
-| `useCountdown` | countdown timer with `start`, `pause`, `reset` controls |
-| `useCommandBar` | open/close the CommandBar programmatically from anywhere |
+| `useForm` | form state and validation |
+| `usePagination` | pagination logic |
+| `useIntersection` | IntersectionObserver wrapper |
+| `useWindowSize` | reactive window dimensions |
+| `useStep` | multi-step wizard state |
+| `useCountdown` | countdown timer |
+| `useCommandBar` | open/close CommandBar programmatically |
 
 ---
 
 ## TypeScript
 
-All components export their prop types. Import directly:
-
 ```ts
-import type { ButtonProps, InputProps, CardProps } from "veloria-ui";
-```
+import type {
+  ButtonProps, InputProps, CardProps,
+  // motion types
+  MotionPreset, MotionConfig, MotionProps,
+} from "veloria-ui";
 
-When you copy a component with `veloria-ui add`, the TypeScript source is copied too — you own it and can extend the types freely.
+import type { MotionPreset, MotionConfig } from "veloria-ui/motion";
+```
 
 ---
 
 ## Accessibility
 
-All interactive components include:
+All interactive components include ARIA roles, keyboard navigation, visible focus rings, screen reader labels, and Radix UI primitives for disclosure/dialog/menu patterns.
 
-- Appropriate ARIA roles and attributes
-- Full keyboard navigation (Tab, Arrow keys, Enter, Space, Escape)
-- Visible focus rings using the `--ring` design token
-- Screen reader friendly labels and live regions
-- Radix UI primitives for disclosure, dialog, menu, and select patterns
+The motion system fully respects `prefers-reduced-motion` — all animations are skipped when the OS setting is enabled.
 
 ---
 
@@ -746,22 +703,19 @@ import { VeloriaProvider } from "veloria-ui/provider";
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>
-        <VeloriaProvider>{children}</VeloriaProvider>
-      </body>
+      <body><VeloriaProvider>{children}</VeloriaProvider></body>
     </html>
   );
 }
 ```
 
-### Vite / React
+### Vite + React
 
 ```tsx
 // src/main.tsx
 import "veloria-ui/styles";
 import { VeloriaProvider } from "veloria-ui/provider";
 import { createRoot } from "react-dom/client";
-import App from "./App";
 
 createRoot(document.getElementById("root")!).render(
   <VeloriaProvider><App /></VeloriaProvider>
@@ -780,9 +734,10 @@ export const links = () => [{ rel: "stylesheet", href: veloriaStyles }];
 export default function App() {
   return (
     <html lang="en">
-      <head><Links /></head>
+      <head><Meta /><Links /></head>
       <body>
         <VeloriaProvider><Outlet /></VeloriaProvider>
+        <ScrollRestoration /><Scripts />
       </body>
     </html>
   );
@@ -793,9 +748,14 @@ export default function App() {
 
 ## Contributing
 
-Issues and PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-→ [github.com/JohnDev19/Veloria-UI/issues](https://github.com/JohnDev19/Veloria-UI/issues)
+```bash
+git clone https://github.com/JohnDev19/Veloria-UI.git
+cd Veloria-UI
+npm install
+npm run build
+```
 
 ---
 
@@ -803,4 +763,10 @@ Issues and PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-Current version: **0.1.8** — Interactive picker, `remove` command, dep graph display.
+Current version: **0.1.9** — `veloria-ui/motion` animation system.
+
+---
+
+<div align="center">
+  <sub>Veloria UI · MIT License · by JohnDev19</sub>
+</div>

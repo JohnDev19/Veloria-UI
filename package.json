@@ -8,7 +8,8 @@
     "aria", "tailwind", "tailwindcss", "nextjs", "typescript", "dark-mode",
     "radix-ui", "component-library", "react-hook-form", "rhf", "form-adapter",
     "sparkline", "gauge", "pricing", "typewriter", "aurora", "rich-text-editor",
-    "tiptap", "data-grid"
+    "tiptap", "data-grid", "animation", "motion", "web-animations-api",
+    "framer-alternative", "zero-dependency-animation"
   ],
   "homepage": "https://ui-veloria.vercel.app/",
   "repository": { "type": "git", "url": "https://github.com/JohnDev19/Veloria-UI.git" },
@@ -19,6 +20,7 @@
   "exports": {
     ".":          { "types": "./dist/index.d.ts",    "import": "./dist/index.mjs",    "require": "./dist/index.js" },
     "./rhf":      { "types": "./dist/rhf.d.ts",      "import": "./dist/rhf.mjs",      "require": "./dist/rhf.js" },
+    "./motion":   { "types": "./dist/motion.d.ts",   "import": "./dist/motion.mjs",   "require": "./dist/motion.js" },
     "./styles":   "./dist/styles/veloria.css",
     "./tailwind": "./dist/tailwind.js",
     "./provider": { "types": "./dist/provider.d.ts", "import": "./dist/provider.mjs", "require": "./dist/provider.js" },
@@ -38,13 +40,13 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-  "chalk": "^4.1.2",
-  "commander": "^11.1.0",
-  "execa": "^5.1.1",
-  "fs-extra": "^11.2.0",
-  "ora": "^5.4.1",
-  "prompts": "^2.4.2"
-},
+    "chalk":     "^4.1.2",
+    "commander": "^11.1.0",
+    "execa":     "^5.1.1",
+    "fs-extra":  "^11.2.0",
+    "ora":       "^5.4.1",
+    "prompts":   "^2.4.2"
+  },
   "devDependencies": {
     "@types/fs-extra":  "^11.0.4",
     "@types/node":      "^20.11.5",

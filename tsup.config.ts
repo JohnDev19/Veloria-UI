@@ -22,8 +22,7 @@ const sharedExternal = [
   "lowlight",
   // react-hook-form — optional peer dep, never bundle it
   "react-hook-form",
-  // veloria-ui itself — the rhf entry imports from it; treat as external
-  // so tsup doesn't try to resolve ./dist/index.mjs during the build
+  // veloria-ui itself — the rhf and motion entries import from it
   "veloria-ui",
 ];
 
@@ -40,15 +39,15 @@ const cliExternal = [
 export default defineConfig([
   // ── Main component library ──────────────────────────────────────────────
   {
-    entry: { index: "src/index.ts" },
-    format: ["cjs", "esm"],
-    dts: true,
+    entry:    { index: "src/index.ts" },
+    format:   ["cjs", "esm"],
+    dts:      true,
     splitting: true,
     sourcemap: true,
-    clean: true,
+    clean:    true,
     treeshake: true,
-    external: sharedExternal,
-    outDir: "dist",
+    external:  sharedExternal,
+    outDir:    "dist",
     banner: {
       js: `/**
  * veloria-ui
@@ -59,7 +58,7 @@ export default defineConfig([
     },
   },
 
-  // ── RHF adapter (optional, only if react-hook-form is installed) ────────
+  // ── RHF adapter ─────────────────────────────────────────────────────────
   {
     entry:     { rhf: "src/rhf/index.ts" },
     format:    ["cjs", "esm"],
@@ -72,7 +71,33 @@ export default defineConfig([
     outDir:    "dist",
   },
 
-  // ── VeloriaProvider (separate entry, needs "use client") ────────────────
+  // ── Motion system ────────────────────────────────────────────────────────
+  //
+  // veloria-ui/motion — zero-dependency animation layer built on the
+  // Web Animations API. No Framer Motion, no GSAP.
+  //
+  // Separate entry so tree-shaking removes it entirely from projects
+  // that don't import it. Keeps "use client" isolated.
+  {
+    entry:     { motion: "src/motion/index.ts" },
+    format:    ["cjs", "esm"],
+    dts:       true,
+    splitting: false,
+    sourcemap: true,
+    clean:     false,
+    treeshake: true,
+    external:  sharedExternal,
+    outDir:    "dist",
+    banner: {
+      js: `/**
+ * veloria-ui/motion
+ * Web Animations API motion layer — zero dependencies.
+ * By JohnDev19 — MIT License
+ */`,
+    },
+  },
+
+  // ── VeloriaProvider ──────────────────────────────────────────────────────
   {
     entry:     { provider: "src/provider.tsx" },
     format:    ["cjs", "esm"],
@@ -83,8 +108,7 @@ export default defineConfig([
     outDir:    "dist",
   },
 
-  // ── Tailwind plugin ─────────────────────────────────────────────────────
-  // tailwindcss itself must stay external — it is a devDep of the consumer.
+  // ── Tailwind plugin ──────────────────────────────────────────────────────
   {
     entry:     { tailwind: "src/tailwind.ts" },
     format:    ["cjs"],
@@ -95,31 +119,26 @@ export default defineConfig([
     outDir:    "dist",
   },
 
-  // ── CLI binary ──────────────────────────────────────────────────────────
+  // ── CLI binary ───────────────────────────────────────────────────────────
   //
   // IMPORTANT — shebang handling:
   //
   // Do NOT use banner: { js: "#!/usr/bin/env node" } here.
-  // tsup's banner is appended after its own generated file header, which
-  // puts the shebang on line 2+. Node.js requires the shebang to be the
-  // very first bytes of the file (byte 0), otherwise it throws:
-  //   SyntaxError: Invalid or unexpected token
+  // tsup's banner is appended after its own generated file header,
+  // which puts the shebang on line 2+. Node.js requires the shebang
+  // to be the very first bytes of the file (byte 0).
   //
-  // Correct approach:
-  //   1. Keep "#!/usr/bin/env node" as the first line of src/cli/index.ts
-  //   2. Set platform: "node" — tsup preserves the source shebang at
-  //      byte 0 in the output and skips adding its own file header.
-  // bakit kasi ganun.
-  //
+  // Correct approach: add the shebang as a postbuild step that prepends
+  // it directly to dist/cli/index.js before publishing.
   {
-    entry:    { "cli/index": "src/cli/index.ts" },
-    format:   ["cjs"],
-    platform: "node",        // tells tsup this is a Node binary
-    dts:      false,
+    entry:     { "cli/index": "src/cli/index.ts" },
+    format:    ["cjs"],
+    dts:       false,
+    splitting: false,
     sourcemap: false,
-    clean:    false,
-    outDir:   "dist",
-    external: cliExternal,
-    // no banner... shebang lives in src/cli/index.ts line 1
+    clean:     false,
+    treeshake: true,
+    external:  cliExternal,
+    outDir:    "dist",
   },
 ]);

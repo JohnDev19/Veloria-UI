@@ -131,7 +131,7 @@ This writes a `veloria.config.json` at your project root and creates `lib/utils.
 
 ## React Hook Form Adapter
 
-**New in v0.1.6.** Import from `veloria-ui/rhf` to get zero-boilerplate `Controller` wrappers for every Veloria UI form component. Requires `react-hook-form ^7.0.0` installed in your project (optional peer dependency — not required unless you use this sub-path).
+Import from `veloria-ui/rhf` to get zero-boilerplate `Controller` wrappers for every Veloria UI form component. Requires `react-hook-form ^7.0.0` installed in your project (optional peer dependency — not required unless you use this sub-path).
 
 ```bash
 npm install react-hook-form

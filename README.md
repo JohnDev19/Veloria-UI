@@ -10,7 +10,7 @@
 
 ### **Build anything. Ship faster.**
 
-Production-ready React components — accessible, composable, dark-mode ready.
+Production-ready React components — accessible, composable, ready.
 Works with Tailwind CSS and Next.js out of the box.
 
 [![npm](https://img.shields.io/npm/v/veloria-ui?color=0ea5e9&label=veloria-ui)](https://www.npmjs.com/package/veloria-ui)
@@ -93,7 +93,7 @@ export default function Page() {
 
 ---
 
-## React Hook Form adapter ✨ new in v0.1.6
+## React Hook Form adapter
 
 Import from `veloria-ui/rhf` for zero-boilerplate RHF-integrated form components. Requires `react-hook-form ^7.0.0`.
 
@@ -144,7 +144,7 @@ npx veloria-ui diff button
 npx veloria-ui diff modal --context 6
 npx veloria-ui diff input --json
 
-# Check all installed components for upstream changes  ✨ new in v0.1.5
+# Check all installed components for upstream changes 
 npx veloria-ui upgrade --check
 npx veloria-ui upgrade
 npx veloria-ui upgrade --all

@@ -2,7 +2,7 @@
   "name": "veloria-ui",
   "version": "0.1.5",
   "private": false,
-  "description": "Veloria UI — Build anything. Ship faster. Accessible, composable React components with Tailwind CSS.",
+  "description": "Veloria UI — Build anything. Ship faster. Accessible, composable React components with Tailwind CSS and dark mode.",
   "keywords": [
     "react",
     "ui",
@@ -80,8 +80,8 @@
     "LICENSE"
   ],
   "scripts": {
-    "build":          "tsup",
-    "dev":            "tsup --watch",
+    "build":          "node -e \"const r=require('child_process'),b=require('fs').existsSync('./node_modules/.bin/tsup');r.execSync(b?'./node_modules/.bin/tsup':'pnpm dlx tsup',{stdio:'inherit'})\"",
+    "dev":            "node -e \"const r=require('child_process'),b=require('fs').existsSync('./node_modules/.bin/tsup');r.execSync((b?'./node_modules/.bin/tsup':'pnpm dlx tsup')+' --watch',{stdio:'inherit'})\"",
     "lint":           "eslint src --ext .ts,.tsx",
     "typecheck":      "tsc --noEmit",
     "clean":          "rm -rf dist",

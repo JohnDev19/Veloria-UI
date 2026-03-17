@@ -79,8 +79,8 @@ program
     const answers = opts.yes
       ? { componentsDir: "components/ui", cssPath: isNext ? "app/globals.css" : "src/index.css", pm: detectPM(cwd) }
       : await prompts([
-          { type: "text",   name: "componentsDir", message: "Where should components go?",      initial: "components/ui" },
-          { type: "text",   name: "cssPath",        message: "Path to your global CSS file?",    initial: isNext ? "app/globals.css" : "src/index.css" },
+          { type: "text",   name: "componentsDir", message: "Where should components go?",   initial: "components/ui" },
+          { type: "text",   name: "cssPath",        message: "Path to your global CSS file?", initial: isNext ? "app/globals.css" : "src/index.css" },
           { type: "select", name: "pm",             message: "Package manager?",
             choices: [{ title: "npm", value: "npm" }, { title: "pnpm", value: "pnpm" },
                       { title: "yarn", value: "yarn" }, { title: "bun", value: "bun" }] },
@@ -88,7 +88,6 @@ program
 
     if (!answers.componentsDir) return;
 
-    // Write veloria.config.json
     fs.writeJsonSync(path.join(cwd, "veloria.config.json"), {
       $schema: "https://ui-veloria.vercel.app/schema.json",
       style: "default",
@@ -98,7 +97,6 @@ program
     }, { spaces: 2 });
     console.log(chalk.green("  ✓ Created veloria.config.json"));
 
-    // Write lib/utils.ts if missing
     const utilsPath = path.join(cwd, "lib", "utils.ts");
     if (!fs.existsSync(utilsPath)) {
       await fs.ensureDir(path.dirname(utilsPath));
@@ -108,7 +106,6 @@ program
       console.log(chalk.green("  ✓ Created lib/utils.ts"));
     }
 
-    // Install core deps
     if (opts.install !== false) {
       const pm = answers.pm as string;
       const spinner = ora(`Installing core deps with ${pm}…`).start();
@@ -145,12 +142,10 @@ program
   .option("-p, --path <dir>", "Override components directory")
   .option("--force",          "Overwrite existing local files")
   .action(async (names: string[], opts) => {
-    const cwd      = process.cwd();
-    const cfgPath  = path.join(cwd, "veloria.config.json");
-    const cfg      = fs.existsSync(cfgPath) ? (fs.readJsonSync(cfgPath) as { aliases?: { components?: string } }) : {};
-    const baseDir  = opts.path
-      ?? cfg.aliases?.components?.replace(/^@\//, "")
-      ?? "components/ui";
+    const cwd       = process.cwd();
+    const cfgPath   = path.join(cwd, "veloria.config.json");
+    const cfg       = fs.existsSync(cfgPath) ? (fs.readJsonSync(cfgPath) as { aliases?: { components?: string } }) : {};
+    const baseDir   = opts.path ?? cfg.aliases?.components?.replace(/^@\//, "") ?? "components/ui";
     const targetDir = path.join(cwd, baseDir);
 
     if (!names.length) {
@@ -178,9 +173,7 @@ program
     }
 
     console.log(chalk.bold.blue(`\n  Adding ${[...toAdd].join(", ")}\n`));
-    if (allDeps.size) {
-      console.log(chalk.dim(`  Peer deps: ${[...allDeps].join(", ")}\n`));
-    }
+    if (allDeps.size) console.log(chalk.dim(`  Peer deps: ${[...allDeps].join(", ")}\n`));
 
     if (!opts.yes) {
       const { ok } = await prompts({
@@ -191,8 +184,6 @@ program
     }
 
     await fs.ensureDir(targetDir);
-
-    // Fetch upstream source and record hash in veloria.lock.json
     const lock = readLock(cwd);
 
     for (const name of toAdd) {
@@ -203,41 +194,40 @@ program
         continue;
       }
 
-      // Try to fetch real upstream source; fall back to stub
-      const urls = resolveGitHubPaths(name);
-      let src: string | null = null;
-      let sourceUrl = "";
-      for (const url of urls) {
-        src = await fetchText(url);
-        if (src !== null) { sourceUrl = url; break; }
-      }
-
       await fs.ensureDir(path.dirname(dest));
 
-      if (src) {
-        await fs.writeFile(dest, src, "utf-8");
-        // Record the upstream hash at install time
-        lock[name] = {
-          upstreamHash: sha256(src),
-          upstreamUrl:  sourceUrl,
-          localPath:    path.relative(cwd, dest),
-          addedAt:      new Date().toISOString(),
-        };
-      } else {
-        // Offline / path not found — write a stub and note it has no hash
-        const stub =
-          `// veloria-ui — ${name}\n` +
-          `// Added by veloria-ui CLI. Edit freely — you own this code.\n` +
-          `// Source: https://github.com/JohnDev19/Veloria-UI/tree/main/src/components\n` +
-          `export * from "veloria-ui";\n`;
-        await fs.writeFile(dest, stub, "utf-8");
-        lock[name] = {
-          upstreamHash: null,
-          upstreamUrl:  null,
-          localPath:    path.relative(cwd, dest),
-          addedAt:      new Date().toISOString(),
-        };
+      // ── Source resolution ─────────────────────────────────────────────
+      // Priority 1: node_modules — works offline and on Replit (no fetch).
+      // Priority 2: GitHub raw — master branch (correct branch name).
+      // Both paths strip the legacy atlas- CSS prefix → veloria-.
+      // ─────────────────────────────────────────────────────────────────
+      let src: string | null = readFromNodeModules(name, cwd);
+      let sourceUrl = "node_modules";
+
+      if (!src) {
+        const urls = resolveGitHubPaths(name);
+        for (const url of urls) {
+          const fetched = await fetchText(url);
+          if (fetched !== null) { src = fetched; sourceUrl = url; break; }
+        }
       }
+
+      if (!src) {
+        console.log(chalk.red(`  ✗ ${name} — could not read source.`));
+        console.log(chalk.dim(`    Make sure veloria-ui is installed: npm install veloria-ui\n`));
+        continue;
+      }
+
+      // Strip legacy atlas- CSS class prefix → veloria-
+      src = src.replace(/\batlas-/g, "veloria-");
+
+      await fs.writeFile(dest, src, "utf-8");
+      lock[name] = {
+        upstreamHash: sha256(src),
+        upstreamUrl:  sourceUrl,
+        localPath:    path.relative(cwd, dest),
+        addedAt:      new Date().toISOString(),
+      };
 
       console.log(chalk.green(`  ✓ ${name}`));
     }
@@ -283,7 +273,7 @@ program
       const label = cat.replace("-", " ").replace(/^\w/, (c) => c.toUpperCase());
       console.log(chalk.bold(`  ${label} (${items.length})`));
       for (const c of items) {
-        console.log(`    ${chalk.cyan(c.name.padEnd(22))} ${chalk.dim(c.description)}`);
+        console.log(`    ${chalk.cyan(c.name.padEnd(26))} ${chalk.dim(c.description)}`);
       }
       console.log();
     }
@@ -324,24 +314,22 @@ program
     const context = parseInt(opts.context ?? "3", 10);
     const spinner = ora(`  Fetching upstream source for ${chalk.cyan(component)}…`).start();
 
-    const urls = resolveGitHubPaths(component);
-    let upstreamSrc: string | null = null;
-    let successUrl = "";
-    for (const url of urls) {
-      upstreamSrc = await fetchText(url);
-      if (upstreamSrc !== null) { successUrl = url; break; }
+    let upstreamSrc: string | null = readFromNodeModules(component, cwd);
+    let successUrl = "node_modules";
+
+    if (!upstreamSrc) {
+      const urls = resolveGitHubPaths(component);
+      for (const url of urls) {
+        upstreamSrc = await fetchText(url);
+        if (upstreamSrc !== null) { successUrl = url; break; }
+      }
     }
 
-    if (upstreamSrc === null) {
+    if (upstreamSrc) upstreamSrc = upstreamSrc.replace(/\batlas-/g, "veloria-");
+
+    if (!upstreamSrc) {
       spinner.fail(chalk.red("  Could not fetch upstream source."));
-      console.log(
-        chalk.dim("\n  Checked:\n") +
-        urls.map((u) => chalk.dim(`    ${u}`)).join("\n") +
-        "\n\n" +
-        chalk.dim("  You may be offline, or this component lives in a non-standard path.\n") +
-        chalk.dim("  View manually: ") +
-        chalk.cyan(`https://github.com/JohnDev19/Veloria-UI/tree/main/src/components\n`)
-      );
+      console.log(chalk.dim("  Make sure veloria-ui is installed: ") + chalk.cyan("npm install veloria-ui\n"));
       process.exit(1);
     }
 
@@ -350,10 +338,7 @@ program
     const localPath = resolveLocalPath(component, cwd);
     if (!localPath) {
       spinner.warn(chalk.yellow(`  No local copy of "${component}" found.`));
-      console.log(
-        chalk.dim("\n  Add it first:\n") +
-        `    ${chalk.cyan(`npx veloria-ui add ${component}`)}\n`
-      );
+      console.log(chalk.dim("\n  Add it first:\n") + `    ${chalk.cyan(`npx veloria-ui add ${component}`)}\n`);
       process.exit(0);
     }
 
@@ -367,9 +352,7 @@ program
       const added   = diff.filter((d) => d.type === "added").length;
       const removed = diff.filter((d) => d.type === "removed").length;
       console.log(JSON.stringify({
-        component,
-        localPath,
-        upstreamUrl: successUrl,
+        component, localPath, upstreamUrl: successUrl,
         summary: { added, removed, changed: added + removed },
         diff: diff.map((d) => ({ type: d.type, lineNo: d.lineNo, content: d.content })),
       }, null, 2));
@@ -381,43 +364,20 @@ program
 
 // ─── upgrade ──────────────────────────────────────────────────────────────
 
-/**
- * How upgrade detects staleness:
- *
- * Each component has three possible states:
- *
- *   UP TO DATE    — upstream hash === hash recorded at install time
- *                   (upstream hasn't changed since you ran `add`)
- *
- *   UPSTREAM CHANGED  — upstream hash !== recorded install hash
- *                       but your local file hash === recorded install hash
- *                       → upstream has new changes, your file is unmodified
- *                       → safe to auto-upgrade
- *
- *   DIVERGED      — upstream hash !== recorded install hash
- *                   AND your local file hash !== recorded install hash
- *                   → both you and upstream have changed the file
- *                   → prompt with a warning before overwriting
- *
- *   NO LOCK DATA  — component was added before veloria.lock.json existed,
- *                   or was added offline (stub only). We fall back to a
- *                   pure content comparison (same as `diff`).
- */
-
 interface UpgradeStatus {
-  name:        string;
-  localPath:   string;
-  upstreamUrl: string;
+  name:         string;
+  localPath:    string;
+  upstreamUrl:  string;
   state:
     | "up-to-date"
-    | "upstream-changed"    // upstream changed, local unmodified — safe upgrade
-    | "diverged"            // both changed — warn before overwriting
-    | "no-lock"             // no lock data, upstream diff exists
-    | "up-to-date-no-lock"  // no lock data but content matches
-    | "not-found-local"     // local file missing (deleted)
-    | "fetch-failed";       // could not reach GitHub
-  upstreamSrc: string | null;
-  addedLines:  number;
+    | "upstream-changed"
+    | "diverged"
+    | "no-lock"
+    | "up-to-date-no-lock"
+    | "not-found-local"
+    | "fetch-failed";
+  upstreamSrc:  string | null;
+  addedLines:   number;
   removedLines: number;
 }
 
@@ -425,271 +385,188 @@ program
   .command("upgrade [component]")
   .alias("up")
   .description("Check installed components for upstream changes and prompt to upgrade")
-  .option("-y, --yes",       "Skip confirmation prompts — upgrade all outdated components")
-  .option("--all",           "Upgrade every outdated component without prompting")
-  .option("--check",         "Only report status, make no changes (dry-run)")
-  .option("--json",          "Output machine-readable JSON status report")
-  .option("--force",         "Overwrite even diverged (locally modified) components")
+  .option("-y, --yes",  "Skip confirmation prompts — upgrade all outdated components")
+  .option("--all",      "Upgrade every outdated component without prompting")
+  .option("--check",    "Only report status, make no changes (dry-run)")
+  .option("--json",     "Output machine-readable JSON status report")
+  .option("--force",    "Overwrite even diverged (locally modified) components")
   .action(async (component: string | undefined, opts) => {
     const cwd = process.cwd();
-
-    // ── 1. Resolve which components to check ──────────────────────────
     let targets: string[] = [];
 
     if (component) {
-      // Single component specified
       if (!COMPONENTS_BY_NAME[component]) {
-        console.error(
-          chalk.red(`\n  Unknown component: "${component}"\n`) +
-          chalk.dim("  Run ") + chalk.cyan("npx veloria-ui list") + chalk.dim(" to see all components.\n")
-        );
+        console.error(chalk.red(`\n  Unknown component: "${component}"\n`) +
+          chalk.dim("  Run ") + chalk.cyan("npx veloria-ui list") + chalk.dim(" to see all components.\n"));
         process.exit(1);
       }
       targets = [component];
     } else {
-      // Auto-discover: scan the components directory and cross-reference with the registry
       targets = discoverInstalledComponents(cwd);
-
       if (!targets.length) {
-        console.log(
-          chalk.bold.blue("\n  veloria-ui upgrade\n") +
+        console.log(chalk.bold.blue("\n  veloria-ui upgrade\n") +
           chalk.dim("  No components found in your project.\n\n") +
           chalk.dim("  Add some first:\n") +
-          `    ${chalk.cyan("npx veloria-ui add button card modal")}\n`
-        );
+          `    ${chalk.cyan("npx veloria-ui add button card modal")}\n`);
         return;
       }
     }
 
-    console.log(
-      chalk.bold.blue("\n  veloria-ui upgrade\n") +
-      chalk.dim(`  Checking ${targets.length} component${targets.length !== 1 ? "s" : ""} against upstream…\n`)
-    );
+    console.log(chalk.bold.blue("\n  veloria-ui upgrade\n") +
+      chalk.dim(`  Checking ${targets.length} component${targets.length !== 1 ? "s" : ""} against upstream…\n`));
 
-    // ── 2. Check each component ────────────────────────────────────────
     const lock     = readLock(cwd);
     const statuses: UpgradeStatus[] = [];
 
     for (const name of targets) {
-      const spinner = ora(`  ${name.padEnd(24)} checking…`).start();
+      const spinner = ora(`  ${name.padEnd(26)} checking…`).start();
 
       const localPath = resolveLocalPath(name, cwd);
       if (!localPath) {
-        spinner.warn(chalk.dim(`  ${name.padEnd(24)} ${chalk.yellow("local file missing")}`));
-        statuses.push({
-          name, localPath: "", upstreamUrl: "", state: "not-found-local",
-          upstreamSrc: null, addedLines: 0, removedLines: 0,
-        });
+        spinner.warn(chalk.dim(`  ${name.padEnd(26)} ${chalk.yellow("local file missing")}`));
+        statuses.push({ name, localPath: "", upstreamUrl: "", state: "not-found-local", upstreamSrc: null, addedLines: 0, removedLines: 0 });
         continue;
       }
 
-      // Fetch upstream
-      const urls = resolveGitHubPaths(name);
-      let upstreamSrc: string | null = null;
-      let upstreamUrl = "";
-      for (const url of urls) {
-        upstreamSrc = await fetchText(url);
-        if (upstreamSrc !== null) { upstreamUrl = url; break; }
+      let upstreamSrc: string | null = readFromNodeModules(name, cwd);
+      let upstreamUrl = "node_modules";
+      if (!upstreamSrc) {
+        const urls = resolveGitHubPaths(name);
+        for (const url of urls) {
+          upstreamSrc = await fetchText(url);
+          if (upstreamSrc !== null) { upstreamUrl = url; break; }
+        }
       }
 
-      if (upstreamSrc === null) {
-        spinner.warn(chalk.dim(`  ${name.padEnd(24)} ${chalk.yellow("fetch failed")}`));
-        statuses.push({
-          name, localPath, upstreamUrl: urls[0] ?? "", state: "fetch-failed",
-          upstreamSrc: null, addedLines: 0, removedLines: 0,
-        });
+      if (!upstreamSrc) {
+        spinner.warn(chalk.dim(`  ${name.padEnd(26)} ${chalk.yellow("fetch failed")}`));
+        statuses.push({ name, localPath, upstreamUrl: "", state: "fetch-failed", upstreamSrc: null, addedLines: 0, removedLines: 0 });
         continue;
       }
 
-      const localSrc      = fs.readFileSync(localPath, "utf-8");
-      const upstreamHash  = sha256(upstreamSrc);
-      const localHash     = sha256(localSrc);
-      const lockEntry     = lock[name];
+      upstreamSrc = upstreamSrc.replace(/\batlas-/g, "veloria-");
 
-      // Count diff lines for summary display
-      const diffLines  = computeDiff(localSrc.split("\n"), upstreamSrc.split("\n"));
-      const addedLines = diffLines.filter((d) => d.type === "added").length;
+      const localSrc     = fs.readFileSync(localPath, "utf-8");
+      const upstreamHash = sha256(upstreamSrc);
+      const localHash    = sha256(localSrc);
+      const lockEntry    = lock[name];
+
+      const diffLines    = computeDiff(localSrc.split("\n"), upstreamSrc.split("\n"));
+      const addedLines   = diffLines.filter((d) => d.type === "added").length;
       const removedLines = diffLines.filter((d) => d.type === "removed").length;
 
       let state: UpgradeStatus["state"];
-
       if (lockEntry?.upstreamHash) {
         const recordedUpstreamHash = lockEntry.upstreamHash;
         const recordedLocalHash    = lockEntry.localHash ?? recordedUpstreamHash;
-
-        if (upstreamHash === recordedUpstreamHash) {
-          // Upstream hasn't changed since install — up to date
-          state = "up-to-date";
-        } else if (localHash === recordedLocalHash) {
-          // Upstream changed, but local is unmodified — safe to upgrade
-          state = "upstream-changed";
-        } else {
-          // Both changed
-          state = "diverged";
-        }
+        if (upstreamHash === recordedUpstreamHash)    state = "up-to-date";
+        else if (localHash === recordedLocalHash)     state = "upstream-changed";
+        else                                          state = "diverged";
       } else {
-        // No lock data — fall back to content comparison
         state = (upstreamHash === localHash) ? "up-to-date-no-lock" : "no-lock";
       }
 
-      // Render inline status badge
       const badge =
-        state === "up-to-date"          ? chalk.green("✓ up to date") :
-        state === "up-to-date-no-lock"  ? chalk.green("✓ up to date") :
-        state === "upstream-changed"    ? chalk.yellow(`↑ ${addedLines}+ ${removedLines}- upstream`) :
-        state === "diverged"            ? chalk.red(`⚡ diverged  ${addedLines}+ ${removedLines}-`) :
-        state === "no-lock"             ? chalk.yellow(`~ ${addedLines}+ ${removedLines}- (no lock)`) :
-                                          chalk.dim("? unknown");
+        state === "up-to-date"         ? chalk.green("✓ up to date") :
+        state === "up-to-date-no-lock" ? chalk.green("✓ up to date") :
+        state === "upstream-changed"   ? chalk.yellow(`↑ ${addedLines}+ ${removedLines}- upstream`) :
+        state === "diverged"           ? chalk.red(`⚡ diverged  ${addedLines}+ ${removedLines}-`) :
+        state === "no-lock"            ? chalk.yellow(`~ ${addedLines}+ ${removedLines}- (no lock)`) :
+                                         chalk.dim("? unknown");
 
-      spinner.succeed(`  ${chalk.cyan(name.padEnd(24))} ${badge}`);
-
+      spinner.succeed(`  ${chalk.cyan(name.padEnd(26))} ${badge}`);
       statuses.push({ name, localPath, upstreamUrl, state, upstreamSrc, addedLines, removedLines });
     }
 
     console.log();
 
-    // ── 3. JSON mode — just print and exit ────────────────────────────
     if (opts.json) {
-      console.log(JSON.stringify(
-        statuses.map(({ upstreamSrc: _, ...s }) => s), // omit full source from JSON
-        null, 2
-      ));
+      console.log(JSON.stringify(statuses.map(({ upstreamSrc: _, ...s }) => s), null, 2));
       return;
     }
 
-    // ── 4. Check mode — summary only, no changes ──────────────────────
-    const outdated = statuses.filter((s) =>
-      s.state === "upstream-changed" || s.state === "diverged" || s.state === "no-lock"
-    );
-    const upToDate  = statuses.filter((s) =>
-      s.state === "up-to-date" || s.state === "up-to-date-no-lock"
-    );
-    const problems  = statuses.filter((s) =>
-      s.state === "not-found-local" || s.state === "fetch-failed"
-    );
+    const outdated = statuses.filter((s) => s.state === "upstream-changed" || s.state === "diverged" || s.state === "no-lock");
+    const upToDate = statuses.filter((s) => s.state === "up-to-date" || s.state === "up-to-date-no-lock");
+    const problems = statuses.filter((s) => s.state === "not-found-local" || s.state === "fetch-failed");
 
-    // Summary line
     console.log(
       chalk.dim(`  ${upToDate.length} up to date`) +
       (outdated.length ? `  ${chalk.yellow(`${outdated.length} outdated`)}` : "") +
-      (problems.length ? `  ${chalk.red(`${problems.length} errors`)}` : "") +
-      "\n"
+      (problems.length ? `  ${chalk.red(`${problems.length} errors`)}` : "") + "\n"
     );
 
     if (opts.check) {
-      if (outdated.length) {
-        console.log(chalk.dim("  Run ") + chalk.cyan("npx veloria-ui upgrade") + chalk.dim(" to apply updates.\n"));
-      }
+      if (outdated.length) console.log(chalk.dim("  Run ") + chalk.cyan("npx veloria-ui upgrade") + chalk.dim(" to apply updates.\n"));
       return;
     }
 
-    if (!outdated.length) {
-      console.log(chalk.green("  All components are up to date.\n"));
-      return;
-    }
+    if (!outdated.length) { console.log(chalk.green("  All components are up to date.\n")); return; }
 
-    // ── 5. Decide what to upgrade ─────────────────────────────────────
     let toUpgrade: UpgradeStatus[];
 
     if (opts.all || opts.yes) {
-      // Upgrade all outdated (skip diverged unless --force)
       toUpgrade = outdated.filter((s) => s.state !== "diverged" || opts.force);
       const skipped = outdated.filter((s) => s.state === "diverged" && !opts.force);
       if (skipped.length) {
         console.log(chalk.yellow(`  Skipping ${skipped.length} diverged component(s) — pass --force to overwrite:\n`) +
-          skipped.map((s) => `    ${chalk.cyan(s.name)}`).join("\n") + "\n"
-        );
+          skipped.map((s) => `    ${chalk.cyan(s.name)}`).join("\n") + "\n");
       }
     } else {
-      // Interactive: prompt per component
       toUpgrade = [];
-
       for (const s of outdated) {
-        const isDiverged = s.state === "diverged";
-
-        // Show a mini diff summary first
         console.log(
           chalk.bold(`  ${chalk.cyan(s.name)}\n`) +
           chalk.dim(`  ${s.localPath}  →  upstream\n`) +
-          (isDiverged
+          (s.state === "diverged"
             ? chalk.red("  ⚡ Warning: you have local edits AND upstream changed. Upgrading will overwrite your changes.\n") +
               chalk.dim("     Consider running ") + chalk.cyan(`npx veloria-ui diff ${s.name}`) + chalk.dim(" first.\n")
-            : ""
-          ) +
+            : "") +
           chalk.green(`  +${s.addedLines}`) + "  " + chalk.red(`-${s.removedLines}`) + "\n"
         );
 
         const { action } = await prompts({
-          type:    "select",
-          name:    "action",
-          message: `Upgrade ${s.name}?`,
+          type: "select", name: "action", message: `Upgrade ${s.name}?`,
           choices: [
-            { title: `${chalk.green("Yes")}  — overwrite with upstream`,                     value: "yes" },
-            { title: `${chalk.cyan("Diff")} — show full diff first, then decide`,            value: "diff" },
-            { title: `${chalk.dim("Skip")} — leave my local copy unchanged`,                 value: "skip" },
+            { title: `${chalk.green("Yes")}  — overwrite with upstream`,          value: "yes" },
+            { title: `${chalk.cyan("Diff")} — show full diff first, then decide`, value: "diff" },
+            { title: `${chalk.dim("Skip")} — leave my local copy unchanged`,      value: "skip" },
           ],
         });
 
-        if (action === "skip" || action === undefined) {
-          console.log(chalk.dim(`  Skipped ${s.name}\n`));
-          continue;
-        }
+        if (action === "skip" || action === undefined) { console.log(chalk.dim(`  Skipped ${s.name}\n`)); continue; }
 
         if (action === "diff") {
-          // Show full diff inline, then re-prompt
           if (s.upstreamSrc) {
-            const localSrc  = fs.readFileSync(s.localPath, "utf-8");
-            const diff      = computeDiff(localSrc.split("\n"), s.upstreamSrc.split("\n"));
-            renderDiff(diff, s.name, s.localPath, s.upstreamUrl, 3);
+            const localSrc = fs.readFileSync(s.localPath, "utf-8");
+            renderDiff(computeDiff(localSrc.split("\n"), s.upstreamSrc.split("\n")), s.name, s.localPath, s.upstreamUrl, 3);
           }
-
-          const { confirmed } = await prompts({
-            type:    "confirm",
-            name:    "confirmed",
-            message: `Apply upstream changes to ${s.name}?`,
-            initial: false,
-          });
-
-          if (!confirmed) {
-            console.log(chalk.dim(`  Skipped ${s.name}\n`));
-            continue;
-          }
+          const { confirmed } = await prompts({ type: "confirm", name: "confirmed", message: `Apply upstream changes to ${s.name}?`, initial: false });
+          if (!confirmed) { console.log(chalk.dim(`  Skipped ${s.name}\n`)); continue; }
         }
 
         toUpgrade.push(s);
       }
     }
 
-    if (!toUpgrade.length) {
-      console.log(chalk.dim("  No components upgraded.\n"));
-      return;
-    }
+    if (!toUpgrade.length) { console.log(chalk.dim("  No components upgraded.\n")); return; }
 
-    // ── 6. Apply upgrades ─────────────────────────────────────────────
     console.log();
     const updatedLock = readLock(cwd);
     let upgraded = 0;
 
     for (const s of toUpgrade) {
       if (!s.upstreamSrc) continue;
-
       const spinner = ora(`  Upgrading ${chalk.cyan(s.name)}…`).start();
-
       try {
         await fs.ensureDir(path.dirname(s.localPath));
         await fs.writeFile(s.localPath, s.upstreamSrc, "utf-8");
-
-        // Update lock: record new upstream hash and current local hash (they match after upgrade)
         const newHash = sha256(s.upstreamSrc);
         updatedLock[s.name] = {
-          upstreamHash: newHash,
-          localHash:    newHash,
-          upstreamUrl:  s.upstreamUrl,
-          localPath:    s.localPath,
+          upstreamHash: newHash, localHash: newHash,
+          upstreamUrl:  s.upstreamUrl, localPath: s.localPath,
           addedAt:      updatedLock[s.name]?.addedAt ?? new Date().toISOString(),
           upgradedAt:   new Date().toISOString(),
         };
-
         spinner.succeed(chalk.green(`  ✓ ${s.name}  upgraded`));
         upgraded++;
       } catch (err) {
@@ -699,11 +576,8 @@ program
     }
 
     writeLock(cwd, updatedLock);
-
-    console.log(
-      `\n${chalk.bold.green(`  Done!`)}  ${upgraded} component${upgraded !== 1 ? "s" : ""} upgraded.\n` +
-      chalk.dim("  veloria.lock.json updated — commit it to track upgrade history.\n")
-    );
+    console.log(`\n${chalk.bold.green("  Done!")}  ${upgraded} component${upgraded !== 1 ? "s" : ""} upgraded.\n` +
+      chalk.dim("  veloria.lock.json updated — commit it to track upgrade history.\n"));
   });
 
 // ─── Error handling ───────────────────────────────────────────────────────
@@ -727,17 +601,9 @@ if (!process.argv.slice(2).length) {
 
 // ─── Lock file ────────────────────────────────────────────────────────────
 
-/**
- * veloria.lock.json tracks the upstream content hash at the time each
- * component was `add`-ed. This lets `upgrade` distinguish three cases:
- *
- *   1. Upstream unchanged          — upstreamHash still matches
- *   2. Upstream changed, local not — safe auto-upgrade
- *   3. Both changed (diverged)     — warn before overwriting
- */
 export interface LockEntry {
-  upstreamHash: string | null; // SHA-256 of upstream source at add time
-  localHash?:   string | null; // SHA-256 of local file at add time (same as upstream unless edited)
+  upstreamHash: string | null;
+  localHash?:   string | null;
   upstreamUrl:  string | null;
   localPath:    string;
   addedAt:      string;
@@ -763,75 +629,52 @@ function sha256(content: string): string {
   return crypto.createHash("sha256").update(content, "utf-8").digest("hex");
 }
 
-// ─── Component discovery ──────────────────────────────────────────────────
+// ─── Read from node_modules ───────────────────────────────────────────────
+//
+// Priority 1 for source resolution.
+// Reads from the locally-installed veloria-ui package — no network call.
+// Works on Replit and any sandboxed / offline environment.
+//
+// Candidate paths tried in order:
+//   node_modules/veloria-ui/src/components/<category>/<PascalName>.tsx
+//   node_modules/veloria-ui/src/components/<category>/<PascalName>.ts
+//   node_modules/veloria-ui/src/components/<category>/index.tsx
+//   node_modules/veloria-ui/src/components/<category>/index.ts
 
-/**
- * Scans the components directory (from veloria.config.json or default) and
- * returns names of any sub-folders that match a registered component name.
- * Also cross-references veloria.lock.json so components added before
- * directory scanning is possible are not missed.
- */
-function discoverInstalledComponents(cwd: string): string[] {
-  const cfgPath = path.join(cwd, "veloria.config.json");
-  const cfg     = fs.existsSync(cfgPath)
-    ? (fs.readJsonSync(cfgPath) as { aliases?: { components?: string } })
-    : {};
-  const baseDir    = cfg.aliases?.components?.replace(/^@\//, "") ?? "components/ui";
-  const targetDir  = path.join(cwd, baseDir);
-  const registryNames = new Set(REGISTRY.map((c) => c.name));
-  const found = new Set<string>();
+function readFromNodeModules(name: string, cwd: string): string | null {
+  const entry = COMPONENTS_BY_NAME[name];
+  if (!entry) return null;
 
-  // scan directory for sub-folders whose name matches a registry entry
-  if (fs.existsSync(targetDir)) {
-    try {
-      const entries = fs.readdirSync(targetDir, { withFileTypes: true });
-      for (const entry of entries) {
-        if (entry.isDirectory() && registryNames.has(entry.name)) {
-          found.add(entry.name);
-        }
-      }
-    } catch {
-      // non-fatal — fall through to lock file discovery
+  const pascal = name.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+  const base   = path.join(cwd, "node_modules", "veloria-ui", "src", "components", entry.category);
+
+  const candidates = [
+    path.join(base, `${pascal}.tsx`),
+    path.join(base, `${pascal}.ts`),
+    path.join(base, "index.tsx"),
+    path.join(base, "index.ts"),
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      try { return fs.readFileSync(candidate, "utf-8"); } catch { /* try next */ }
     }
   }
 
-  // include anything tracked in the lock file but not in the scanned folder
-  // (like components placed in a non-standard sub-path)
-  const lock = readLock(cwd);
-  for (const name of Object.keys(lock)) {
-    if (registryNames.has(name)) found.add(name);
-  }
-
-  return [...found].sort();
+  return null;
 }
 
 // ─── GitHub path resolution ───────────────────────────────────────────────
+//
+// Priority 2 — fallback when node_modules src is unavailable.
+// IMPORTANT: correct branch is "master", not "main".
 
 function resolveGitHubPaths(name: string): string[] {
   const entry = COMPONENTS_BY_NAME[name];
   if (!entry) return [];
 
-  const categoryFolder: Record<string, string> = {
-    "basic":          "basic",
-    "layout":         "layout",
-    "navigation":     "navigation",
-    "forms":          "forms",
-    "advanced-forms": "advanced-forms",
-    "data-display":   "data-display",
-    "feedback":       "feedback",
-    "overlay":        "overlay",
-    "media":          "media",
-    "utility":        "utility",
-  };
-
-  const folder = categoryFolder[entry.category] ?? entry.category;
-  const pascal = name
-    .split("-")
-    .map((p) => p[0].toUpperCase() + p.slice(1))
-    .join("");
-
-  const base =
-    `https://raw.githubusercontent.com/JohnDev19/Veloria-UI/main/src/components/${folder}`;
+  const pascal = name.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
+  const base   = `https://raw.githubusercontent.com/JohnDev19/Veloria-UI/master/src/components/${entry.category}`;
 
   return [
     `${base}/${pascal}.tsx`,
@@ -854,7 +697,6 @@ async function fetchText(url: string): Promise<string | null> {
 // ─── Local path resolution ────────────────────────────────────────────────
 
 function resolveLocalPath(name: string, cwd: string): string | null {
-  // check veloria.lock.json for the recorded path
   const lock = readLock(cwd);
   if (lock[name]?.localPath) {
     const lockPath = path.join(cwd, lock[name].localPath);
@@ -863,14 +705,10 @@ function resolveLocalPath(name: string, cwd: string): string | null {
 
   const cfgPath = path.join(cwd, "veloria.config.json");
   const baseDir = fs.existsSync(cfgPath)
-    ? ((fs.readJsonSync(cfgPath) as { aliases?: { components?: string } })
-        .aliases?.components?.replace(/^@\//, "") ?? "components/ui")
+    ? ((fs.readJsonSync(cfgPath) as { aliases?: { components?: string } }).aliases?.components?.replace(/^@\//, "") ?? "components/ui")
     : "components/ui";
 
-  const pascal = name
-    .split("-")
-    .map((p) => p[0].toUpperCase() + p.slice(1))
-    .join("");
+  const pascal = name.split("-").map((p) => p[0].toUpperCase() + p.slice(1)).join("");
 
   const candidates = [
     path.join(cwd, baseDir, name, "index.tsx"),
@@ -880,6 +718,33 @@ function resolveLocalPath(name: string, cwd: string): string | null {
   ];
 
   return candidates.find((p) => fs.existsSync(p)) ?? null;
+}
+
+// ─── Component discovery ──────────────────────────────────────────────────
+
+function discoverInstalledComponents(cwd: string): string[] {
+  const cfgPath = path.join(cwd, "veloria.config.json");
+  const cfg     = fs.existsSync(cfgPath) ? (fs.readJsonSync(cfgPath) as { aliases?: { components?: string } }) : {};
+  const baseDir   = cfg.aliases?.components?.replace(/^@\//, "") ?? "components/ui";
+  const targetDir = path.join(cwd, baseDir);
+  const registryNames = new Set(REGISTRY.map((c) => c.name));
+  const found = new Set<string>();
+
+  if (fs.existsSync(targetDir)) {
+    try {
+      const entries = fs.readdirSync(targetDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory() && registryNames.has(entry.name)) found.add(entry.name);
+      }
+    } catch { /* non-fatal */ }
+  }
+
+  const lock = readLock(cwd);
+  for (const name of Object.keys(lock)) {
+    if (registryNames.has(name)) found.add(name);
+  }
+
+  return [...found].sort();
 }
 
 // ─── Myers diff ───────────────────────────────────────────────────────────
@@ -900,11 +765,8 @@ function computeDiff(localLines: string[], upstreamLines: string[]): DiffLine[] 
 
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
-      if (localLines[i - 1] === upstreamLines[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1];
-      } else {
-        dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
-      }
+      if (localLines[i - 1] === upstreamLines[j - 1]) dp[i][j] = dp[i - 1][j - 1];
+      else dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
     }
   }
 
@@ -929,16 +791,8 @@ function computeDiff(localLines: string[], upstreamLines: string[]): DiffLine[] 
 
 // ─── Terminal diff renderer ───────────────────────────────────────────────
 
-function renderDiff(
-  diff: DiffLine[],
-  componentName: string,
-  localPath: string,
-  upstreamUrl: string,
-  context = 3,
-): void {
-  const changedIndexes = diff
-    .map((d, idx) => (d.type !== "equal" ? idx : -1))
-    .filter((i) => i !== -1);
+function renderDiff(diff: DiffLine[], componentName: string, localPath: string, upstreamUrl: string, context = 3): void {
+  const changedIndexes = diff.map((d, idx) => (d.type !== "equal" ? idx : -1)).filter((i) => i !== -1);
 
   if (changedIndexes.length === 0) {
     console.log(chalk.green(`\n  ✓ ${componentName} is up to date — no differences found.\n`));
@@ -953,19 +807,11 @@ function renderDiff(
     chalk.dim(`  local     ${localPath}\n`) +
     chalk.dim(`  upstream  ${upstreamUrl}\n`)
   );
-
-  console.log(
-    chalk.green(`  +${added} addition${added !== 1 ? "s" : ""}`) +
-    "  " +
-    chalk.red(`  -${removed} deletion${removed !== 1 ? "s" : ""}`) +
-    "\n"
-  );
+  console.log(chalk.green(`  +${added} addition${added !== 1 ? "s" : ""}`) + "  " + chalk.red(`  -${removed} deletion${removed !== 1 ? "s" : ""}`) + "\n");
 
   const visible = new Set<number>();
   for (const idx of changedIndexes) {
-    for (let k = Math.max(0, idx - context); k <= Math.min(diff.length - 1, idx + context); k++) {
-      visible.add(k);
-    }
+    for (let k = Math.max(0, idx - context); k <= Math.min(diff.length - 1, idx + context); k++) visible.add(k);
   }
 
   let prevVisible = false;
@@ -976,25 +822,15 @@ function renderDiff(
       continue;
     }
     prevVisible = true;
-
     const line    = diff[idx];
     const lineNum = (line.lineNo.local ?? line.lineNo.upstream ?? 0).toString().padStart(4);
-
-    if (line.type === "added") {
-      console.log(chalk.green(`${lineNum}  + ${line.content}`));
-    } else if (line.type === "removed") {
-      console.log(chalk.red(`${lineNum}  - ${line.content}`));
-    } else {
-      console.log(chalk.dim(`${lineNum}    ${line.content}`));
-    }
+    if (line.type === "added")        console.log(chalk.green(`${lineNum}  + ${line.content}`));
+    else if (line.type === "removed") console.log(chalk.red(`${lineNum}  - ${line.content}`));
+    else                              console.log(chalk.dim(`${lineNum}    ${line.content}`));
   }
 
   console.log();
-  console.log(
-    chalk.dim("  To update your local copy, run: ") +
-    chalk.cyan(`npx veloria-ui upgrade ${componentName}`) +
-    "\n"
-  );
+  console.log(chalk.dim("  To update your local copy, run: ") + chalk.cyan(`npx veloria-ui upgrade ${componentName}`) + "\n");
 }
 
 // ─── Package manager detection ────────────────────────────────────────────

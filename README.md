@@ -93,6 +93,36 @@ export default function Page() {
 
 ---
 
+## React Hook Form adapter ✨ new in v0.1.6
+
+Import from `veloria-ui/rhf` for zero-boilerplate RHF-integrated form components. Requires `react-hook-form ^7.0.0`.
+
+```tsx
+import { useForm } from "react-hook-form";
+import { RhfInput, RhfSelect, RhfCheckbox, RhfSlider } from "veloria-ui/rhf";
+
+const { control, handleSubmit } = useForm<{
+  email: string;
+  role: string;
+  agree: boolean;
+  volume: number;
+}>();
+
+<form onSubmit={handleSubmit(onSubmit)}>
+  <RhfInput    name="email"  control={control} label="Email" type="email" />
+  <RhfSelect   name="role"   control={control} label="Role"  options={roles} />
+  <RhfSlider   name="volume" control={control} label="Volume" min={0} max={100} showValue />
+  <RhfCheckbox name="agree"  control={control} label="I agree to the terms" />
+  <Button type="submit">Submit</Button>
+</form>
+```
+
+All 11 wrappers: `RhfInput`, `RhfTextArea`, `RhfSelect`, `RhfCheckbox`, `RhfSwitch`, `RhfRadioGroup`, `RhfSlider`, `RhfCombobox`, `RhfMultiSelect`, `RhfRatingInput`, `RhfOTPInput`.
+
+Each wrapper automatically handles `invalid` state, renders `<FormError>` with the validation message, and forwards all original visual props unchanged.
+
+---
+
 ## CLI
 
 veloria-ui ships with a CLI that copies components straight into your project — shadcn-style. You own the code.
@@ -109,64 +139,35 @@ npx veloria-ui add card modal drawer toast
 npx veloria-ui list
 npx veloria-ui list --category forms
 
-# Compare your local copy to the latest upstream version  ✨ new in v0.1.5
+# Compare your local copy to the latest upstream version
 npx veloria-ui diff button
 npx veloria-ui diff modal --context 6
 npx veloria-ui diff input --json
+
+# Check all installed components for upstream changes  ✨ new in v0.1.5
+npx veloria-ui upgrade --check
+npx veloria-ui upgrade
+npx veloria-ui upgrade --all
 ```
 
 ### `diff` — upstream comparison
 
-`veloria-ui diff` is a first-of-its-kind feature in the React UI component space. After you've customised a component that was originally added via `veloria-ui add`, you can run diff at any time to see exactly what changed in the upstream source — without leaving your terminal.
+`veloria-ui diff` is a first-of-its-kind feature in the React UI component space. After you've customised a component that was originally added via `veloria-ui add`, run diff at any time to see exactly what changed in the upstream source — without leaving your terminal.
 
 ```
-$ npx veloria-ui diff button
-
   diff  button
   local     components/ui/button/index.tsx
   upstream  https://raw.githubusercontent.com/JohnDev19/Veloria-UI/main/…
 
   +3 additions    -1 deletion
 
-    12     const buttonVariants = cva(
-    13  -    "inline-flex items-center justify-center rounded-md text-sm",
-    14  +    "inline-flex items-center justify-center gap-2 rounded-md text-sm",
-    15       {
-   ···
-    31  +    loading: "opacity-70 cursor-wait",
-    32       },
+    13  -    "inline-flex items-center justify-center rounded-md",
+    14  +    "inline-flex items-center justify-center gap-2 rounded-md",
 ```
 
-**How it works:**
-1. Fetches the latest source directly from the GitHub raw API — no npm round-trip.
-2. Locates your local copy via `veloria.config.json` (falls back to common paths).
-3. Runs a Myers diff (the same algorithm Git uses) and renders unified-style hunks.
+### `upgrade` — keep components in sync
 
-**Flags:**
-
-| Flag | Description |
-|------|-------------|
-| `--context <n>` | Lines of context around each change (default: `3`) |
-| `--json` | Output machine-readable JSON — useful in CI |
-
----
-
-## Theming
-
-Override them in your global CSS:
-
-```css
-:root {
-  /* swap in your brand color */
-  --primary: 262 83% 58%;
-  --primary-foreground: 0 0% 100%;
-
-  /* rounder corners */
-  --radius: 0.75rem;
-}
-```
-
-Full token list: `--background` `--foreground` `--primary` `--secondary` `--muted` `--accent` `--destructive` `--success` `--warning` `--info` `--border` `--input` `--ring` `--radius`.
+`veloria-ui upgrade` checks every installed component against upstream using a three-state model: **up-to-date**, **upstream-changed** (safe to auto-upgrade), and **diverged** (you've modified it locally — warned before overwriting). Powered by `veloria.lock.json`.
 
 ---
 
@@ -194,19 +195,19 @@ veloria-ui/
 │   │   ├── basic/           Button, IconButton, Badge, Avatar, Tooltip…
 │   │   ├── layout/          Container, Stack, Grid, ScrollArea, Masonry…
 │   │   ├── navigation/      Navbar, Tabs, DropdownMenu, Stepper…
-│   │   ├── forms/           Input, Select, Checkbox, Slider, NumberInput, AvatarUpload…
-│   │   ├── advanced-forms/  OTPInput, ColorPicker, Combobox, MultiSelect…
-│   │   ├── data-display/    Card, DataTable, SparklineChart, RadialProgressChart,
-│   │   │                    GaugeChart, AuroraCard, PricingCard, FileCard…
-│   │   ├── feedback/        Alert, Toast, Skeleton, StepProgress, EmptyState…
-│   │   ├── overlay/         Modal, Drawer, CommandDialog, Lightbox…
+│   │   ├── forms/           Input, Select, Checkbox, Slider, DateRangePicker…
+│   │   ├── advanced-forms/  OTPInput, ColorPicker, Combobox, MultiSelect, RichTextEditor…
+│   │   ├── data-display/    Card, DataTable, DataGrid, SparklineChart, GaugeChart…
+│   │   ├── feedback/        Alert, Toast, Skeleton, EmptyState, BannerAlert…
+│   │   ├── overlay/         Modal, Drawer, CommandDialog, CommandBar…
 │   │   ├── media/           VideoPlayer, AudioPlayer, Carousel, Gallery…
 │   │   └── utility/         ThemeSwitcher, CopyButton, TypewriterText…
+│   ├── rhf/                 React Hook Form adapter (veloria-ui/rhf)
 │   ├── hooks/               utility hooks
 │   ├── styles/              veloria.css — full design token system
 │   ├── types/               shared TypeScript types
 │   ├── utils/               cn() and helpers
-│   ├── cli/                 veloria-ui CLI (add, init, list, diff)
+│   ├── cli/                 veloria-ui CLI (add, init, list, diff, upgrade)
 │   ├── provider.tsx         VeloriaProvider for Next.js
 │   └── tailwind.ts          veloriaPlugin + veloriaPreset
 ├── package.json
@@ -242,5 +243,5 @@ MIT © [JohnDev19](https://github.com/JohnDev19)
 ---
 
 <div align="center">
-  <sub>Built by JohnDev19 · v0.1.5</sub>
+  <sub>Built by JohnDev19 · v0.1.6</sub>
 </div>

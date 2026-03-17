@@ -34,7 +34,7 @@ export function RhfCombobox<T extends FieldValues>({
           {label && <FormLabel htmlFor={name}>{label}</FormLabel>}
           <Combobox
             value={field.value ?? ""}
-            onValueChange={field.onChange}
+            onChange={field.onChange}
             options={options}
             placeholder={placeholder}
             searchPlaceholder={searchPlaceholder}

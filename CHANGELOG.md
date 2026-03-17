@@ -9,6 +9,56 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ## [0.1.5] — 2026-03-17
 
+### React Hook Form Adapter — `veloria-ui/rhf`
+
+A new optional sub-path export that provides zero-boilerplate `Controller` wrappers for every Veloria UI form component. Import from `veloria-ui/rhf` — requires `react-hook-form ^7.0.0` as an optional peer dependency.
+
+**11 wrappers shipped:**
+
+| Wrapper | Wraps | Notes |
+|---------|-------|-------|
+| `RhfInput` | `Input` + `FormField` | All `InputProps` forwarded (size, leftElement, rightElement…) |
+| `RhfTextArea` | `TextArea` + `FormField` | Full resize/rows control |
+| `RhfSelect` | Radix `Select` + `FormField` | `onValueChange` bridged to `field.onChange` |
+| `RhfCheckbox` | `Checkbox` + `FormField` | Boolean field — `checked` ↔ `field.value` |
+| `RhfSwitch` | `Switch` + `FormField` | Same boolean mapping as `RhfCheckbox` |
+| `RhfRadioGroup` | `RadioGroup` + `FormField` | `onValueChange` → `field.onChange` |
+| `RhfSlider` | `Slider` + `FormField` | Stores plain `number`, converts to `number[]` internally |
+| `RhfCombobox` | `Combobox` + `FormField` | `onChange` bridged to `field.onChange` |
+| `RhfMultiSelect` | `MultiSelect` + `FormField` | Field value is `string[]` |
+| `RhfRatingInput` | `RatingInput` + `FormField` | Numeric value |
+| `RhfOTPInput` | `OTPInput` + `FormField` | String value |
+
+Every wrapper automatically maps `fieldState.error` to the component's `invalid` prop and renders `<FormError>` with the message. All original visual props (`size`, `placeholder`, `disabled`, `label`, etc.) pass straight through — no new API surface to learn.
+
+**Usage:**
+
+```tsx
+import { useForm } from "react-hook-form";
+import { RhfInput, RhfSelect, RhfCheckbox } from "veloria-ui/rhf";
+
+const { control, handleSubmit } = useForm<{ email: string; role: string; agree: boolean }>();
+
+<form onSubmit={handleSubmit(onSubmit)}>
+  <RhfInput    name="email"  control={control} label="Email" type="email" />
+  <RhfSelect   name="role"   control={control} label="Role"  options={roles} />
+  <RhfCheckbox name="agree"  control={control} label="I agree to the terms" />
+</form>
+```
+
+### Build
+
+- `veloria-ui/rhf` entry added to `exports` map in `package.json`
+- New tsup build target for `src/rhf/index.ts` (CJS + ESM + DTS)
+- `react-hook-form` added to `sharedExternal` — never bundled
+- `veloria-ui` itself added to `sharedExternal` — prevents self-resolution error during the RHF build pass
+- All `Rhf*.tsx` files import from `../index` (relative source path) rather than `"veloria-ui"` package name — eliminates circular resolve during build
+
+### Infrastructure
+
+- `.npmrc` added with `public-hoist-pattern[]=tsup` and `public-hoist-pattern[]=typescript` so `pnpm install` always hoists build tool binaries to `node_modules/.bin` — fixes `tsup: not found` on Replit and similar isolated-store environments
+- `react-hook-form ^7.0.0` added as optional peer dependency
+
 ### New Components (5)
 
 **`DataGrid`** (`data-display`)
